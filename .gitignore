@@ -1,0 +1,14 @@
+*~
+*.class
+*.iml
+.idea
+.project
+.classpath
+WebApp.launch
+out
+gwt-unitCache
+war/WEB-INF/deploy/*
+war/WEB-INF/lib/*
+war/webapp
+*.cache.js
+*.gwt.rpc
