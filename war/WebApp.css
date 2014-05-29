@@ -16,10 +16,6 @@ table {
 
 table.mainGrid table {
     padding-right: 50px;
-    border: 1px #000000;
-}
-
-table.mainGrid table {
     border: 1px solid #000000;
 }
 
