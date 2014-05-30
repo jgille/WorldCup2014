@@ -1,5 +1,7 @@
+*#
 *~
 *.class
+target
 *.iml
 .idea
 .project
