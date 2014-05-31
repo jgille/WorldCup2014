@@ -1,5 +1,8 @@
 package org.jon.ivmark.worldcup.client;
 
+import org.jon.ivmark.worldcup.client.domain.Game;
+import org.jon.ivmark.worldcup.client.domain.GameId;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package org.jon.ivmark.worldcup.client;
+package org.jon.ivmark.worldcup.client.domain;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

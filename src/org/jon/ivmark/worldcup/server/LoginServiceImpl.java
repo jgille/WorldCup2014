@@ -4,7 +4,7 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import org.jon.ivmark.worldcup.client.LoginInfo;
+import org.jon.ivmark.worldcup.shared.LoginInfo;
 import org.jon.ivmark.worldcup.client.LoginService;
 
 public class LoginServiceImpl extends RemoteServiceServlet implements LoginService {

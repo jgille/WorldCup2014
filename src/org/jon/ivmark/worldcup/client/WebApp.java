@@ -8,6 +8,10 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import org.jon.ivmark.worldcup.client.domain.Game;
+import org.jon.ivmark.worldcup.client.domain.GameId;
+import org.jon.ivmark.worldcup.client.domain.Games;
+import org.jon.ivmark.worldcup.shared.LoginInfo;
 
 import java.util.ArrayList;
 import java.util.List;

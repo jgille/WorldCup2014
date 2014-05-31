@@ -1,4 +1,4 @@
-package org.jon.ivmark.worldcup.client;
+package org.jon.ivmark.worldcup.client.domain;
 
 public class GameId {
 

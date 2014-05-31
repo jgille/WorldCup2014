@@ -3,7 +3,7 @@ package org.jon.ivmark.worldcup.client;
 import java.util.ArrayList;
 import java.util.List;
 
-class Round {
+public class Round {
 
     public static final int NUM_ROUNDS = 3;
     public static final int NUM_GAMES = 16;
@@ -12,14 +12,14 @@ class Round {
 
     private final int round;
 
-    Round(int round) {
+    public Round(int round) {
         this.round = round;
         for (int gameNumber = 0; gameNumber < NUM_GAMES; gameNumber++) {
             plays.add(new Play(round, gameNumber));
         }
     }
 
-    public int numRows() {
+    public int numPlayedRows() {
         int numRows = 0;
         for (Play play : plays) {
             int numChecked = play.numChecked();
@@ -33,7 +33,7 @@ class Round {
     }
 
     public boolean isValid() {
-        return numRows() <= MAX_NUM_ROWS && allGamesAreChecked();
+        return numPlayedRows() <= MAX_NUM_ROWS && allGamesAreChecked();
     }
 
     private boolean allGamesAreChecked() {
@@ -46,7 +46,7 @@ class Round {
     }
 
     public String numRowsText() {
-        return "Antal rader: " + numRows();
+        return "Antal rader: " + numPlayedRows();
     }
 
     public Play getGame(int gameNumber) {

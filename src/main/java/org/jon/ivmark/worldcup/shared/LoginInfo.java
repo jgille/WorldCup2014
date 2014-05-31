@@ -1,4 +1,4 @@
-package org.jon.ivmark.worldcup.client;
+package org.jon.ivmark.worldcup.shared;
 
 import java.io.Serializable;
 

@@ -11,13 +11,21 @@
         <servlet-name>loginService</servlet-name>
         <servlet-class>org.jon.ivmark.worldcup.server.LoginServiceImpl</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>playService</servlet-name>
+        <servlet-class>org.jon.ivmark.worldcup.server.PlayServiceImpl</servlet-class>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>loginService</servlet-name>
         <url-pattern>/webapp/login</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>playService</servlet-name>
+        <url-pattern>/webapp/play</url-pattern>
+    </servlet-mapping>
 
-  <!-- Default page to serve -->
+    <!-- Default page to serve -->
   <welcome-file-list>
     <welcome-file>WebApp.html</welcome-file>
   </welcome-file-list>

@@ -1,5 +1,7 @@
 package org.jon.ivmark.worldcup.client;
 
+import org.jon.ivmark.worldcup.client.domain.GameId;
+
 public class Game {
 
     private final GameId gameId;

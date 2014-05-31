@@ -8,17 +8,18 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import org.jon.ivmark.worldcup.client.domain.*;
+import org.jon.ivmark.worldcup.shared.LoginInfo;
+import org.jon.ivmark.worldcup.shared.PlaysDto;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class WebApp implements EntryPoint {
 
-    private static final Logger LOGGER = Logger.getLogger(WebApp.class.getName());
     private static final int ONE_INDEX = 0;
     private static final int X_INDEX = 1;
     private static final int TWO_INDEX = 2;
@@ -32,13 +33,13 @@ public class WebApp implements EntryPoint {
     private VerticalPanel userPanel = new VerticalPanel();
     private Anchor signOutLink = new Anchor("Logga ut");
 
-    private final List<Label> numRowsLabels = new ArrayList<Label>(Round.NUM_ROUNDS);
-    private final List<Button> saveButtons = new ArrayList<Button>(Round.NUM_ROUNDS);
+    private final List<Label> numRowsLabels = new ArrayList<>(Round.NUM_ROUNDS);
+    private final List<Button> saveButtons = new ArrayList<>(Round.NUM_ROUNDS);
 
-    private final List<Round> rounds;
+    private List<Round> rounds;
 
     public WebApp() {
-        this.rounds = new ArrayList<Round>(Round.NUM_ROUNDS);
+        this.rounds = new ArrayList<>(Round.NUM_ROUNDS);
         for (int i = 0; i < Round.NUM_ROUNDS; i++) {
             rounds.add(new Round(i));
         }
@@ -57,7 +58,7 @@ public class WebApp implements EntryPoint {
             public void onSuccess(LoginInfo result) {
                 loginInfo = result;
                 if (loginInfo.isLoggedIn()) {
-                    loadWorldCupPage(loginInfo);
+                    loadRounds(loginInfo);
                 } else {
                     loadLogin();
                 }
@@ -74,7 +75,6 @@ public class WebApp implements EntryPoint {
     }
 
     private void loadWorldCupPage(LoginInfo loginInfo) {
-        LOGGER.info("Loading page...");
 
         signOutLink.setHref(loginInfo.getLogoutUrl());
         userPanel.add(new Label("Välkommen " + loginInfo.getNickname()));
@@ -101,6 +101,8 @@ public class WebApp implements EntryPoint {
             grid.setText(0, 2, "X");
             grid.setText(0, 3, "2");
 
+            Round round = getRound(roundIndex);
+
             for (int gameIndex = 0; gameIndex < Round.NUM_GAMES; gameIndex++) {
                 GameId gameId = new GameId(roundIndex, gameIndex);
                 Game game = games.get(gameId);
@@ -108,10 +110,16 @@ public class WebApp implements EntryPoint {
                 int row = gameIndex + 1;
                 grid.setWidget(row, 0, gameLabel);
 
-                for (int sign = ONE_INDEX; sign <= TWO_INDEX; sign++) {
-                    CheckBox checkBox = createCheckBox(roundIndex, gameIndex, sign, false);
-                    grid.setWidget(row, sign + 1, checkBox);
-                }
+                Play play = round.getPlay(gameIndex);
+
+                CheckBox checkBoxOne = createCheckBox(roundIndex, gameIndex, ONE_INDEX, play.isOneChecked());
+                grid.setWidget(row, 1, checkBoxOne);
+
+                CheckBox checkBoxX = createCheckBox(roundIndex, gameIndex, X_INDEX, play.isXChecked());
+                grid.setWidget(row, 2, checkBoxX);
+
+                CheckBox checkBoxTwo = createCheckBox(roundIndex, gameIndex, TWO_INDEX, play.isTwoChecked());
+                grid.setWidget(row, 3, checkBoxTwo);
             }
 
             HTMLTable.CellFormatter cellFormatter1X2 = grid.getCellFormatter();
@@ -121,17 +129,17 @@ public class WebApp implements EntryPoint {
                 }
             }
 
-            Round round = rounds.get(roundIndex);
             Label label = new Label(round.numRowsText());
             mainGrid.setWidget(2, roundIndex, label);
 
-            Button saveButton = new Button("Spara");
+            final Button saveButton = new Button("Spara");
             saveButton.setEnabled(round.isValid());
             final int finalRoundNumber = roundIndex;
             saveButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    System.out.println("Saving round " + finalRoundNumber);
+                    saveButton.setText("Sparar...");
+                    saveRound(saveButton, finalRoundNumber);
                 }
             });
             mainGrid.setWidget(3, roundIndex, saveButton);
@@ -143,6 +151,48 @@ public class WebApp implements EntryPoint {
         }
 
         RootPanel.get("main").add(mainGrid);
+    }
+
+    private void loadRounds(final LoginInfo loginInfo) {
+
+        PlayServiceAsync playService = GWT.create(PlayService.class);
+        playService.loadPlays(new AsyncCallback<List<PlaysDto>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(List<PlaysDto> result) {
+                rounds = new ArrayList<>(result.size());
+                for (PlaysDto playsDto : result) {
+                    Round round = Round.fromPlaysDto(playsDto);
+                    rounds.add(round);
+                }
+                loadWorldCupPage(loginInfo);
+            }
+        });
+
+    }
+
+    private void saveRound(final Button button, int roundIndex) {
+        PlayServiceAsync playService = GWT.create(PlayService.class);
+        PlaysDto plays = getRound(roundIndex).asDto();
+        playService.savePlay(plays, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                RootPanel.get("main").add(new Label("Ooops, något gick åt skogen"));
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                button.setText("Spara");
+                button.setEnabled(false);
+            }
+        });
+    }
+
+    private Round getRound(int roundIndex) {
+        return rounds.get(roundIndex);
     }
 
     private CheckBox createCheckBox(final int round, final int game, final int signIndex, boolean check) {
@@ -158,9 +208,9 @@ public class WebApp implements EntryPoint {
     }
 
     private void checkBoxStateChanged(int roundNumber, int gameNumber, int signIndex, boolean isChecked) {
-        Round round = rounds.get(roundNumber);
+        Round round = getRound(roundNumber);
 
-        Play play = round.getGame(gameNumber);
+        Play play = getGame(gameNumber, round);
         switch (signIndex) {
             case ONE_INDEX:
                 play.setOne(isChecked);
@@ -175,8 +225,17 @@ public class WebApp implements EntryPoint {
 
         Label label = numRowsLabels.get(roundNumber);
         label.setText(round.numRowsText());
+        if (round.tooManyRows()) {
+            label.setStyleName("invalid");
+        } else {
+            label.removeStyleName("invalid");
+        }
         Button saveButton = saveButtons.get(roundNumber);
         saveButton.setEnabled(round.isValid());
+    }
+
+    private Play getGame(int gameNumber, Round round) {
+        return round.getPlay(gameNumber);
     }
 
 }
