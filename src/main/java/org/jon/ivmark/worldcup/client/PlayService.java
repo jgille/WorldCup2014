@@ -14,4 +14,8 @@ public interface PlayService extends RemoteService {
 
     List<PlaysDto> loadPlays();
 
+    String getTeamName();
+
+    void setTeamName(String teamName);
+
 }

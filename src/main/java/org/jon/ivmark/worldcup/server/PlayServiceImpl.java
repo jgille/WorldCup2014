@@ -14,7 +14,8 @@ import java.util.logging.Logger;
 
 public class PlayServiceImpl extends RemoteServiceServlet implements PlayService {
 
-    private final PlaysRepository repository = new DataStorePlaysRepository();
+    private final PlaysRepository playsRepository = new DataStorePlaysRepository();
+    private final TeamRepository teamRepository = new DataStoreTeamRepository();
 
     private static final Logger LOGGER = Logger.getLogger(DataStorePlaysRepository.class.getName());
 
@@ -22,7 +23,7 @@ public class PlayServiceImpl extends RemoteServiceServlet implements PlayService
     public void savePlay(PlaysDto plays) {
         User currentUser = getCurrentUser();
         LOGGER.info("Saving play for user: " + currentUser.getNickname());
-        repository.save(currentUser, plays);
+        playsRepository.save(currentUser, plays);
     }
 
     @Override
@@ -32,10 +33,22 @@ public class PlayServiceImpl extends RemoteServiceServlet implements PlayService
 
         List<PlaysDto> playsDtos = new ArrayList<>();
         for (int roundIndex = 0; roundIndex < Round.NUM_ROUNDS; roundIndex++) {
-            PlaysDto playsDto = repository.get(currentUser, roundIndex);
+            PlaysDto playsDto = playsRepository.get(currentUser, roundIndex);
             playsDtos.add(playsDto);
         }
         return playsDtos;
+    }
+
+    @Override
+    public String getTeamName() {
+        User currentUser = getCurrentUser();
+        return teamRepository.getTeamName(currentUser);
+    }
+
+    @Override
+    public void setTeamName(String teamName) {
+        User currentUser = getCurrentUser();
+        teamRepository.setTeamName(currentUser, teamName);
     }
 
     private User getCurrentUser() {

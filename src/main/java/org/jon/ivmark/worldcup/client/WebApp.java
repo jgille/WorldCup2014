@@ -3,15 +3,16 @@ package org.jon.ivmark.worldcup.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.jon.ivmark.worldcup.client.domain.*;
+import org.jon.ivmark.worldcup.shared.GameResult;
 import org.jon.ivmark.worldcup.shared.LoginInfo;
 import org.jon.ivmark.worldcup.shared.PlaysDto;
+import org.jon.ivmark.worldcup.shared.Result;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,24 +27,46 @@ public class WebApp implements EntryPoint {
     private static final int TWO_INDEX = 2;
 
     private LoginInfo loginInfo = null;
+
     private VerticalPanel loginPanel = new VerticalPanel();
     private Label loginLabel = new Label(
             "Logga in med ditt Google-konto.");
     private Anchor signInLink = new Anchor("Logga in");
 
     private VerticalPanel userPanel = new VerticalPanel();
+    private Label userLabel = new Label();
+
     private Anchor signOutLink = new Anchor("Logga ut");
-
     private final List<Label> numRowsLabels = new ArrayList<>(Round.NUM_ROUNDS);
-    private final List<Button> saveButtons = new ArrayList<>(Round.NUM_ROUNDS);
 
+    private final List<Button> saveButtons = new ArrayList<>(Round.NUM_ROUNDS);
     private List<Round> rounds;
+    private TextBox teamTextBox = new TextBox();
+    private Button saveSettingsButton = new Button("Spara");
+    private VerticalPanel resultsPanel = new VerticalPanel();
+    private List<Result> results;
 
     public WebApp() {
         this.rounds = new ArrayList<>(Round.NUM_ROUNDS);
         for (int i = 0; i < Round.NUM_ROUNDS; i++) {
             rounds.add(new Round(i));
         }
+
+        saveSettingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                saveSettings();
+            }
+        });
+        teamTextBox.addKeyUpHandler(new KeyUpHandler() {
+
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                // TODO: Use Pattern
+                saveSettingsButton.setEnabled(teamTextBox.getText().trim().length() > 1);
+            }
+        });
+        teamTextBox.setMaxLength(50);
     }
 
     /**
@@ -59,10 +82,29 @@ public class WebApp implements EntryPoint {
             public void onSuccess(LoginInfo result) {
                 loginInfo = result;
                 if (loginInfo.isLoggedIn()) {
-                    loadRounds(loginInfo);
+                    loadTeam();
+                    loadRounds();
+                    loadResultPage();
                 } else {
                     loadLogin();
                 }
+            }
+
+        });
+    }
+
+    private void loadTeam() {
+        PlayServiceAsync playService = GWT.create(PlayService.class);
+        playService.getTeamName(new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(String teamName) {
+                signOutLink.setHref(loginInfo.getLogoutUrl());
+                userLabel.setText(getWelcomeText(teamName));
+                teamTextBox.setText(teamName);
             }
         });
     }
@@ -75,12 +117,7 @@ public class WebApp implements EntryPoint {
         RootPanel.get().add(loginPanel);
     }
 
-    private void loadWorldCupPage(LoginInfo loginInfo) {
-
-        signOutLink.setHref(loginInfo.getLogoutUrl());
-        userPanel.add(new Label("Välkommen " + loginInfo.getNickname()));
-        userPanel.add(signOutLink);
-
+    private void loadWorldCupPage() {
         Grid mainGrid = new Grid(4, Round.NUM_ROUNDS);
         mainGrid.setStyleName("mainGrid");
 
@@ -134,7 +171,7 @@ public class WebApp implements EntryPoint {
             mainGrid.setWidget(2, roundIndex, label);
 
             final Button saveButton = new Button("Spara");
-            saveButton.setEnabled(round.isValid());
+            saveButton.setEnabled(false);
             final int finalRoundNumber = roundIndex;
             saveButton.addClickHandler(new ClickHandler() {
                 @Override
@@ -155,19 +192,157 @@ public class WebApp implements EntryPoint {
 
         TabLayoutPanel tabs = new TabLayoutPanel(1.5, Style.Unit.EM);
         tabs.add(mainGrid, "Dina spel");
+
+        tabs.add(resultsPanel, "Resultat");
+        tabs.add(new Label("Inte tillgänglig ännu."), "Topplista");
+        tabs.add(new Label("Inte tillgängliga ännu."), "Alla spel");
+
+        HorizontalPanel settingsPanel = new HorizontalPanel();
+        settingsPanel.add(new Label("Lagnamn:"));
+        settingsPanel.add(teamTextBox);
+        settingsPanel.add(saveSettingsButton);
+        settingsPanel.setStyleName("settingsPanel");
+        tabs.add(settingsPanel, "Inställningar");
+
         tabs.add(new HTML(Rules.rulesHtml()), "Regler");
 
         DockLayoutPanel header = new DockLayoutPanel(Style.Unit.EM);
+
+        userPanel.add(userLabel);
+        userPanel.add(signOutLink);
         header.addEast(userPanel, 20);
         mainPanel.addNorth(header, 4);
         mainPanel.add(tabs);
 
         RootLayoutPanel.get().add(mainPanel);
-
     }
 
-    private void loadRounds(final LoginInfo loginInfo) {
+    private void loadResultPage() {
+        ResultsServiceAsync resultsService = GWT.create(ResultsService.class);
+        resultsService.loadResults(new AsyncCallback<List<Result>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
 
+            @Override
+            public void onSuccess(List<Result> results) {
+                WebApp.this.results = results;
+                renderResultsPanel();
+            }
+        });
+    }
+
+    private void renderResultsPanel() {
+        Grid main = new Grid(2, 3);
+
+        HTMLTable.CellFormatter cellFormatter = main.getCellFormatter();
+
+        for (int col = 0; col < Round.NUM_ROUNDS; col++) {
+            main.setText(0, col, "Omgång " + (col + 1));
+            cellFormatter.setStyleName(0, col, "tableHeading");
+        }
+
+        Games games = Games.allGames();
+        for (final Result result : results) {
+
+            Grid resultGrid = new Grid(Round.NUM_GAMES + 1, 4);
+
+            resultGrid.setText(0, 1, "1");
+            resultGrid.setText(0, 2, "X");
+            resultGrid.setText(0, 3, "2");
+
+            resultGrid.setStyleName("resultsGrid");
+            int gameIndex = 0;
+            for (GameResult gameResult : result.getResults()) {
+                Game game = games.get(new GameId(result.getRoundIndex(), gameIndex));
+                int row = gameIndex + 1;
+                resultGrid.setText(row, 0, game.label());
+                for (int i = 0; i < 3; i++) {
+                    RadioButton radioButton = createRadioButton(result, gameIndex, gameResult, i);
+                    radioButton.setEnabled(loginInfo.isAdmin());
+                    resultGrid.setWidget(row, i + 1, radioButton);
+                }
+                gameIndex++;
+
+                HTMLTable.CellFormatter cellFormatter1X2 = resultGrid.getCellFormatter();
+                for (int r = 0; r < 17; r++) {
+                    for (int c = 1; c < 4; c++) {
+                        cellFormatter1X2.setHorizontalAlignment(r, c, HasHorizontalAlignment.ALIGN_CENTER);
+                    }
+                }
+            }
+
+            main.setWidget(1, result.getRoundIndex(), resultGrid);
+        }
+        resultsPanel.setStyleName("resultsPanel");
+        resultsPanel.add(main);
+        if (loginInfo.isAdmin()) {
+        Button saveButton = new Button("Spara");
+        saveButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                saveResults();
+            }
+        });
+        resultsPanel.add(saveButton);
+        }
+    }
+
+    private void saveResults() {
+        ResultsServiceAsync resultsService = GWT.create(ResultsService.class);
+        for (Result result : results) {
+            resultsService.saveResult(result, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                }
+            });
+        }
+    }
+
+    private RadioButton createRadioButton(final Result result, final int gameIndex, final GameResult gameResult,
+                                          final int index) {
+        final RadioButton radioButton = new RadioButton("rb-" + result.getRoundIndex() + "-" + gameIndex);
+        if (index == gameResult.intValue()) {
+            radioButton.setValue(true);
+        }
+        radioButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (radioButton.getValue()) {
+                    result.setResult(gameIndex, GameResult.fromInt(index));
+                } else {
+                    result.setResult(gameIndex, GameResult.UNKNOWN);
+                }
+            }
+        });
+        return radioButton;
+    }
+
+    private void saveSettings() {
+        PlayServiceAsync playService = GWT.create(PlayService.class);
+        final String name = teamTextBox.getText();
+        playService.setTeamName(name, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                userLabel.setText(getWelcomeText(name));
+                saveSettingsButton.setEnabled(false);
+            }
+        });
+    }
+
+    private String getWelcomeText(String teamName) {
+        return "Välkommen " + teamName;
+    }
+
+    private void loadRounds() {
         PlayServiceAsync playService = GWT.create(PlayService.class);
         playService.loadPlays(new AsyncCallback<List<PlaysDto>>() {
             @Override
@@ -181,7 +356,7 @@ public class WebApp implements EntryPoint {
                     Round round = Round.fromPlaysDto(playsDto);
                     rounds.add(round);
                 }
-                loadWorldCupPage(loginInfo);
+                loadWorldCupPage();
             }
         });
 

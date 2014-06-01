@@ -7,14 +7,13 @@ import org.jon.ivmark.worldcup.shared.PlayDto;
 import org.jon.ivmark.worldcup.shared.PlaysDto;
 
 public class DataStorePlaysRepository implements PlaysRepository {
-    private static final String KIND = "test";
+    private static final String KIND = "play";
 
     @Override
     public void save(User user, PlaysDto playsDto) {
         String id = getId(user, playsDto.roundIndex);
         Entity entity = new Entity(KIND, id);
         entity.setProperty("email", user.getEmail());
-        entity.setProperty("nickname", user.getNickname());
         entity.setProperty("user_id", user.getUserId());
         entity.setProperty("round_index", playsDto.roundIndex);
 

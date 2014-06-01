@@ -33,3 +33,26 @@ table {
 .mainGrid {
     border-style: hidden !important;
 }
+
+.settingsPanel {
+    border-style: hidden !important;
+}
+
+.settingsPanel .gwt-Label {
+   padding-top: 4px;
+   padding-right: 10px;
+}
+
+.settingsPanel .gwt-Button {
+    margin-top: 2px !important;
+    margin-left: 10px !important;
+}
+
+.resultsPanel {
+    border-style: hidden !important;
+}
+
+.resultsGrid {
+    padding-right: 40px;
+    border: 1px solid;
+}

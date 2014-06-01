@@ -4,11 +4,20 @@ import java.io.Serializable;
 
 public class LoginInfo implements Serializable {
 
+    private boolean isAdmin = false;
     private boolean loggedIn = false;
     private String loginUrl;
     private String logoutUrl;
     private String emailAddress;
     private String nickname;
+
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
 
     public boolean isLoggedIn() {
         return loggedIn;

@@ -13,4 +13,8 @@ public interface PlayServiceAsync {
     void savePlay(PlaysDto plays, AsyncCallback<Void> callback);
 
     void loadPlays(AsyncCallback<List<PlaysDto>> async);
+
+    void getTeamName(AsyncCallback<String> async);
+
+    void setTeamName(String teamName, AsyncCallback<Void> async);
 }
