@@ -1,21 +1,18 @@
 /** Add css rules here for your application. */
 
-h1 {
-    font-size: 2em;
-    font-weight: bold;
-    color: #777777;
-    margin: 40px 0 70px;
-    text-align: center;
-}
-
 table {
     padding-right: 10px;
     padding-left: 10px;
 }
 
-table.mainGrid table {
-    padding-right: 50px;
-    border: 1px solid #000000;
+.roundTable {
+    padding-right: 40px;
+    border: 1px solid;
+}
+
+.rulesTable td {
+    padding: 2px 10px;
+    border: 1px solid;
 }
 
 .tableHeading {
@@ -24,16 +21,15 @@ table.mainGrid table {
     padding-bottom: 10px;
 }
 
-.sendButton {
-    display: block;
-    font-size: 16pt;
-}
-
-/** Most GWT widgets already have a style name defined */
-.gwt-DialogBox {
-    width: 400px;
-}
-
 .invalid {
-    color: red;
+    color: #8B0000;
+}
+
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab {
+    border-top-right-radius: 15px;
+    -moz-border-radius-topright: 15px;
+}
+
+.mainGrid {
+    border-style: hidden !important;
 }

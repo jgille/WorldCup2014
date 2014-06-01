@@ -2,6 +2,7 @@ package org.jon.ivmark.worldcup.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -71,7 +72,7 @@ public class WebApp implements EntryPoint {
         signInLink.setHref(loginInfo.getLoginUrl());
         loginPanel.add(loginLabel);
         loginPanel.add(signInLink);
-        RootPanel.get("main").add(loginPanel);
+        RootPanel.get().add(loginPanel);
     }
 
     private void loadWorldCupPage(LoginInfo loginInfo) {
@@ -79,7 +80,6 @@ public class WebApp implements EntryPoint {
         signOutLink.setHref(loginInfo.getLogoutUrl());
         userPanel.add(new Label("Välkommen " + loginInfo.getNickname()));
         userPanel.add(signOutLink);
-        RootPanel.get("user").add(userPanel);
 
         Grid mainGrid = new Grid(4, Round.NUM_ROUNDS);
         mainGrid.setStyleName("mainGrid");
@@ -95,6 +95,7 @@ public class WebApp implements EntryPoint {
 
         for (int roundIndex = 0; roundIndex < Round.NUM_ROUNDS; roundIndex++) {
             Grid grid = new Grid(Round.NUM_GAMES + 1, 4);
+            grid.setStyleName("roundTable");
 
             grid.setText(0, 0, "");
             grid.setText(0, 1, "1");
@@ -150,7 +151,19 @@ public class WebApp implements EntryPoint {
             mainGrid.setWidget(1, roundIndex, grid);
         }
 
-        RootPanel.get("main").add(mainGrid);
+        DockLayoutPanel mainPanel = new DockLayoutPanel(Style.Unit.EM);
+
+        TabLayoutPanel tabs = new TabLayoutPanel(1.5, Style.Unit.EM);
+        tabs.add(mainGrid, "Dina spel");
+        tabs.add(new HTML(Rules.rulesHtml()), "Regler");
+
+        DockLayoutPanel header = new DockLayoutPanel(Style.Unit.EM);
+        header.addEast(userPanel, 20);
+        mainPanel.addNorth(header, 4);
+        mainPanel.add(tabs);
+
+        RootLayoutPanel.get().add(mainPanel);
+
     }
 
     private void loadRounds(final LoginInfo loginInfo) {
@@ -180,7 +193,7 @@ public class WebApp implements EntryPoint {
         playService.savePlay(plays, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                RootPanel.get("main").add(new Label("Ooops, något gick åt skogen"));
+                RootPanel.get().add(new Label("Ooops, något gick åt skogen"));
             }
 
             @Override
