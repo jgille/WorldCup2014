@@ -30,4 +30,8 @@ public class PlayDto implements Serializable {
         string += checked[2] ? "2" : "";
         return string;
     }
+
+    public boolean isCorrect(GameResult result) {
+        return result != GameResult.UNKNOWN && checked[result.intValue()];
+    }
 }

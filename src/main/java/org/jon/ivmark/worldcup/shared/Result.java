@@ -38,6 +38,15 @@ public class Result implements Serializable {
         return results;
     }
 
+    public boolean isComplete() {
+        for (GameResult gameResult : results) {
+            if (gameResult == GameResult.UNKNOWN) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
         return "Result{" +

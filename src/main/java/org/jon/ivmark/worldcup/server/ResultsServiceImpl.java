@@ -5,16 +5,21 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.jon.ivmark.worldcup.client.ResultsService;
 import org.jon.ivmark.worldcup.client.domain.Round;
 import org.jon.ivmark.worldcup.shared.GameResult;
+import org.jon.ivmark.worldcup.shared.PlaysDto;
 import org.jon.ivmark.worldcup.shared.Result;
+import org.jon.ivmark.worldcup.shared.TopList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class ResultsServiceImpl extends RemoteServiceServlet implements ResultsService {
     private static final String KIND = "result";
 
     private static final Logger LOGGER = Logger.getLogger(ResultsServiceImpl.class.getName());
+
+    private final PlaysRepository playsRepository = new DataStorePlaysRepository();
 
     @Override
     public List<Result> loadResults() {
@@ -53,6 +58,14 @@ public class ResultsServiceImpl extends RemoteServiceServlet implements ResultsS
         datastoreService.put(entity);
         LOGGER.info("Saved result: " + result);
 
+    }
+
+    @Override
+    public TopList getTopList() {
+        Map<String,List<PlaysDto>> playsByTeam = playsRepository.getAll().byTeamNameWithAllRoundsSubmitted();
+        List<Result> results = loadResults();
+
+        return TopList.computeTopList(results, playsByTeam);
     }
 
     private Key getKey(int roundIndex) {

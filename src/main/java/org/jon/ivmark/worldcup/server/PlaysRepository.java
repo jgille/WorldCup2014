@@ -8,4 +8,6 @@ public interface PlaysRepository {
     void save(User user, PlaysDto playsDto);
 
     PlaysDto get(User user, int roundIndex);
+
+    AllPlaysDtos getAll();
 }
