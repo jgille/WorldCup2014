@@ -6,6 +6,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.jon.ivmark.worldcup.client.domain.*;
@@ -27,11 +28,6 @@ public class WebApp implements EntryPoint {
     private static final int TWO_INDEX = 2;
 
     private LoginInfo loginInfo = null;
-
-    private VerticalPanel loginPanel = new VerticalPanel();
-    private Label loginLabel = new Label(
-            "Logga in med ditt Google-konto.");
-    private Anchor signInLink = new Anchor("Logga in");
 
     private VerticalPanel userPanel = new VerticalPanel();
     private Label userLabel = new Label();
@@ -110,11 +106,7 @@ public class WebApp implements EntryPoint {
     }
 
     private void loadLogin() {
-        // Assemble login panel.
-        signInLink.setHref(loginInfo.getLoginUrl());
-        loginPanel.add(loginLabel);
-        loginPanel.add(signInLink);
-        RootPanel.get().add(loginPanel);
+        Window.Location.assign(loginInfo.getLoginUrl());
     }
 
     private void loadWorldCupPage() {
