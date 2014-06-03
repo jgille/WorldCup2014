@@ -32,4 +32,11 @@ public class TopListEntry implements Serializable {
         return total;
     }
 
+    @Override
+    public String toString() {
+        return "TopListEntry{" +
+                "teamName='" + teamName + '\'' +
+                ", entries=" + entries +
+                '}';
+    }
 }

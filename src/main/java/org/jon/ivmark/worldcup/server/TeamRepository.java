@@ -7,4 +7,6 @@ public interface TeamRepository {
     String getTeamName(User user);
 
     void setTeamName(User user, String teamName);
+
+    String getTeamName(String teamName);
 }

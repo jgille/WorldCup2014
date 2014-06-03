@@ -142,4 +142,10 @@ public class TopList implements Serializable {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return "TopList{" +
+                "entries=" + entries +
+                '}';
+    }
 }

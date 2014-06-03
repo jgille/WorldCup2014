@@ -10,10 +10,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.jon.ivmark.worldcup.client.domain.*;
-import org.jon.ivmark.worldcup.shared.GameResult;
-import org.jon.ivmark.worldcup.shared.LoginInfo;
-import org.jon.ivmark.worldcup.shared.PlaysDto;
-import org.jon.ivmark.worldcup.shared.Result;
+import org.jon.ivmark.worldcup.shared.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +38,7 @@ public class WebApp implements EntryPoint {
     private Button saveSettingsButton = new Button("Spara");
     private VerticalPanel resultsPanel = new VerticalPanel();
     private List<Result> results;
+    private Label topListPanel = new Label("Inte tillgänglig än");
 
     public WebApp() {
         this.rounds = new ArrayList<>(Round.NUM_ROUNDS);
@@ -81,11 +79,29 @@ public class WebApp implements EntryPoint {
                     loadTeam();
                     loadRounds();
                     loadResultPage();
+                    loadToplist();
                 } else {
                     loadLogin();
                 }
             }
 
+        });
+    }
+
+    private void loadToplist() {
+        ResultsServiceAsync resultsServiceAsync = GWT.create(ResultsService.class);
+        resultsServiceAsync.getTopList(new AsyncCallback<TopList>() {
+            @Override
+            public void onFailure(Throwable caught) {
+
+            }
+
+            @Override
+            public void onSuccess(TopList result) {
+                if (loginInfo.isAdmin()) {
+                    topListPanel.setText(result.toString());
+                }
+            }
         });
     }
 
@@ -186,7 +202,7 @@ public class WebApp implements EntryPoint {
         tabs.add(mainGrid, "Dina spel");
 
         tabs.add(resultsPanel, "Resultat");
-        tabs.add(new Label("Inte tillgänglig ännu."), "Topplista");
+        tabs.add(topListPanel, "Topplista");
         tabs.add(new Label("Inte tillgängliga ännu."), "Alla spel");
 
         HorizontalPanel settingsPanel = new HorizontalPanel();

@@ -36,4 +36,15 @@ public class DataStoreTeamRepository implements TeamRepository {
         entity.setUnindexedProperty("name", teamName);
         datastoreService.put(entity);
     }
+
+    @Override
+    public String getTeamName(String userId) {
+        DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+        try {
+            Entity entity = datastoreService.get(KeyFactory.createKey(KIND, userId));
+            return (String) entity.getProperty("name");
+        } catch (EntityNotFoundException e) {
+            return userId;
+        }
+    }
 }

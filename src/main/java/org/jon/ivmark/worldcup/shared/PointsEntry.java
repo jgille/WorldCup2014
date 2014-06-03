@@ -31,4 +31,13 @@ public class PointsEntry implements Serializable {
     public void setPoints(int points) {
         this.points = points;
     }
+
+    @Override
+    public String toString() {
+        return "PointsEntry{" +
+                "roundIndex=" + roundIndex +
+                ", numCorrectGames=" + numCorrectGames +
+                ", points=" + points +
+                '}';
+    }
 }

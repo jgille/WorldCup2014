@@ -4,10 +4,7 @@ import com.google.appengine.api.datastore.*;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.jon.ivmark.worldcup.client.ResultsService;
 import org.jon.ivmark.worldcup.client.domain.Round;
-import org.jon.ivmark.worldcup.shared.GameResult;
-import org.jon.ivmark.worldcup.shared.PlaysDto;
-import org.jon.ivmark.worldcup.shared.Result;
-import org.jon.ivmark.worldcup.shared.TopList;
+import org.jon.ivmark.worldcup.shared.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +17,7 @@ public class ResultsServiceImpl extends RemoteServiceServlet implements ResultsS
     private static final Logger LOGGER = Logger.getLogger(ResultsServiceImpl.class.getName());
 
     private final PlaysRepository playsRepository = new DataStorePlaysRepository();
+    private final TeamRepository teamRepository = new DataStoreTeamRepository();
 
     @Override
     public List<Result> loadResults() {
@@ -65,7 +63,15 @@ public class ResultsServiceImpl extends RemoteServiceServlet implements ResultsS
         Map<String,List<PlaysDto>> playsByTeam = playsRepository.getAll().byTeamNameWithAllRoundsSubmitted();
         List<Result> results = loadResults();
 
-        return TopList.computeTopList(results, playsByTeam);
+        TopList topList = TopList.computeTopList(results, playsByTeam);
+        for (TopListEntry topListEntry : topList.getEntries()) {
+            topListEntry.setTeamName(getTeamName(topListEntry.getTeamName()));
+        }
+        return topList;
+    }
+
+    private String getTeamName(String teamName) {
+        return teamRepository.getTeamName(teamName);
     }
 
     private Key getKey(int roundIndex) {
