@@ -1,9 +1,14 @@
 package org.jon.ivmark.worldcup.shared;
 
+import org.jon.ivmark.worldcup.client.domain.Round;
+
 import java.io.Serializable;
 import java.util.*;
 
 public class TopList implements Serializable {
+
+    private static final int[] POINTS =
+            new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10_000, 15_000, 20_000, 30_000, 50_000, 100_000};
 
     private List<TopListEntry> entries;
 
@@ -33,13 +38,14 @@ public class TopList implements Serializable {
 
             int i = 0;
             for (PlaysDto playsDto : plays) {
-                Result result = results.get(i);
+                Result result = results.get(i++);
                 if (result.getRoundIndex() != playsDto.roundIndex) {
                     throw new IllegalArgumentException();
                 }
                 int numCorrect = playsDto.computeNumCorrect(result);
                 PointsEntry pointsEntry = new PointsEntry();
                 pointsEntry.setNumCorrectGames(numCorrect);
+                pointsEntry.setRoundIndex(playsDto.roundIndex);
                 pointsEntries.add(pointsEntry);
             }
         }
@@ -66,11 +72,74 @@ public class TopList implements Serializable {
     }
 
     static TopList computeTopList(List<TopListEntry> topListEntries) {
-        // TODO: Implement
-        // - Group by round
-        // - Compute points for each round
-        // - Sum points per team
-        // - Sort by total points descending
-        return new TopList();
+        List<List<PointsEntry>> byRound = groupByRound(topListEntries);
+
+        for (List<PointsEntry> roundTopListEntries : byRound) {
+            int numTeams = 0;
+            Map<Integer, List<PointsEntry>> byNumCorrect = groupByNumCorrect(roundTopListEntries);
+
+            for (int numCorrectGames = Round.NUM_GAMES; numCorrectGames >= 0; numCorrectGames--) {
+                List<PointsEntry> entries = byNumCorrect.get(numCorrectGames);
+                if (entries == null) {
+                    continue;
+                }
+                numTeams += entries.size();
+                int points = computePoints(numTeams, numCorrectGames);
+                for (PointsEntry entry : entries) {
+                    entry.setPoints(points);
+                }
+            }
+        }
+        TopList topList = new TopList();
+        sort(topListEntries);
+        topList.entries = topListEntries;
+        return topList;
     }
+
+    static void sort(List<TopListEntry> topListEntries) {
+        Collections.sort(topListEntries, new Comparator<TopListEntry>() {
+            @Override
+            public int compare(TopListEntry entry1, TopListEntry entry2) {
+                int diff = entry2.totalPoints() - entry1.totalPoints();
+                if (diff != 0) {
+                    return diff;
+                }
+                return entry1.getTeamName().compareTo(entry2.getTeamName());
+            }
+        });
+    }
+
+    static int computePoints(int numTeams, int numCorrectGames) {
+        return POINTS[numCorrectGames] / numTeams;
+    }
+
+    private static Map<Integer, List<PointsEntry>> groupByNumCorrect(List<PointsEntry> pointsEntries) {
+        Map<Integer, List<PointsEntry>> result = new HashMap<>();
+        for (PointsEntry pointsEntry : pointsEntries) {
+            int numCorrectGames = pointsEntry.getNumCorrectGames();
+            List<PointsEntry> entries = result.get(numCorrectGames);
+            if (entries == null) {
+                entries = new ArrayList<>();
+                result.put(numCorrectGames, entries);
+            }
+            entries.add(pointsEntry);
+        }
+        return result;
+    }
+
+    private static List<List<PointsEntry>> groupByRound(List<TopListEntry> topListEntries) {
+        List<List<PointsEntry>> result = new ArrayList<>();
+        for (int roundIndex = 0; roundIndex < Round.NUM_ROUNDS; roundIndex++) {
+            result.add(new ArrayList<PointsEntry>());
+        }
+
+        for (TopListEntry entry : topListEntries) {
+            for (PointsEntry pointsEntry : entry.getEntries()) {
+                result.get(pointsEntry.getRoundIndex()).add(pointsEntry);
+            }
+        }
+
+        return result;
+    }
+
 }
