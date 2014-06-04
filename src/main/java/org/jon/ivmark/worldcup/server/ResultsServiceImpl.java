@@ -25,7 +25,7 @@ public class ResultsServiceImpl extends RemoteServiceServlet implements ResultsS
         for (int roundIndex = 0; roundIndex < Round.NUM_ROUNDS; roundIndex++) {
             results.add(loadResult(roundIndex));
         }
-        LOGGER.info("Loaded results");
+        LOGGER.info("Loaded results " + results);
         return results;
     }
 
@@ -35,7 +35,8 @@ public class ResultsServiceImpl extends RemoteServiceServlet implements ResultsS
             Result result = new Result(roundIndex);
             Entity entity = datastoreService.get(getKey(roundIndex));
             for (int gameIndex = 0; gameIndex < Round.NUM_GAMES; gameIndex++) {
-                GameResult gameResult = GameResult.valueOf((String) entity.getProperty("g" + gameIndex));
+                String property = (String) entity.getProperty(getGamePropertyName(gameIndex));
+                GameResult gameResult = GameResult.valueOf(property);
                 result.setResult(gameIndex, gameResult);
             }
             return result;
@@ -44,14 +45,18 @@ public class ResultsServiceImpl extends RemoteServiceServlet implements ResultsS
         }
     }
 
+    private String getGamePropertyName(int gameIndex) {
+        return "g" + gameIndex;
+    }
+
     @Override
     public void saveResult(Result result) {
         DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
-        Entity entity = new Entity(KIND, getKey(result.getRoundIndex()));
+        Entity entity = new Entity(KIND, getRoundKey(result.getRoundIndex()));
         entity.setProperty("round_index", result.getRoundIndex());
         int gameIndex = 0;
         for (GameResult gameResult : result.getResults()) {
-            entity.setUnindexedProperty("g" + gameIndex++, gameResult.name());
+            entity.setUnindexedProperty(getGamePropertyName(gameIndex++), gameResult.name());
         }
         datastoreService.put(entity);
         LOGGER.info("Saved result: " + result);
@@ -67,6 +72,7 @@ public class ResultsServiceImpl extends RemoteServiceServlet implements ResultsS
         for (TopListEntry topListEntry : topList.getEntries()) {
             topListEntry.setTeamName(getTeamName(topListEntry.getTeamName()));
         }
+        LOGGER.info("Loaded top list");
         return topList;
     }
 
@@ -75,6 +81,10 @@ public class ResultsServiceImpl extends RemoteServiceServlet implements ResultsS
     }
 
     private Key getKey(int roundIndex) {
-        return KeyFactory.createKey(KIND, "round_" + roundIndex);
+        return KeyFactory.createKey(KIND, getRoundKey(roundIndex));
+    }
+
+    private String getRoundKey(int roundIndex) {
+        return "round_" + roundIndex;
     }
 }

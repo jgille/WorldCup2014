@@ -38,7 +38,7 @@ public class WebApp implements EntryPoint {
     private Button saveSettingsButton = new Button("Spara");
     private VerticalPanel resultsPanel = new VerticalPanel();
     private List<Result> results;
-    private Label topListPanel = new Label("Inte tillgänglig än");
+    private VerticalPanel topListPanel = new VerticalPanel();
 
     public WebApp() {
         this.rounds = new ArrayList<>(Round.NUM_ROUNDS);
@@ -76,10 +76,10 @@ public class WebApp implements EntryPoint {
             public void onSuccess(LoginInfo result) {
                 loginInfo = result;
                 if (loginInfo.isLoggedIn()) {
-                    loadTeam();
                     loadRounds();
-                    loadResultPage();
                     loadToplist();
+                    loadTeam();
+                    loadResultPage();
                 } else {
                     loadLogin();
                 }
@@ -98,11 +98,55 @@ public class WebApp implements EntryPoint {
 
             @Override
             public void onSuccess(TopList result) {
-                if (loginInfo.isAdmin()) {
-                    topListPanel.setText(result.toString());
-                }
+                renderToplist(result);
             }
         });
+    }
+
+    private void renderToplist(TopList result) {
+        topListPanel.setStyleName("topListPanel");
+        List<TopListEntry> entries = result.getEntries();
+
+        Grid overallToplist = new Grid(entries.size() + 1, 6);
+        overallToplist.setStyleName("topListGrid");
+        int firstRow = 0;
+        int col = 0;
+        overallToplist.setText(firstRow, col++, "");
+        overallToplist.setText(firstRow, col++, "Lag");
+        overallToplist.setText(firstRow, col++, "Omgång 1");
+        overallToplist.setText(firstRow, col++, "Omgång 2");
+        overallToplist.setText(firstRow, col++, "Omgång 3");
+        overallToplist.setText(firstRow, col, "Totalt");
+
+        HTMLTable.CellFormatter cellFormatter = overallToplist.getCellFormatter();
+
+        for (int column = 0; column < 6; column++) {
+            cellFormatter.setStyleName(0, column, "tableHeading");
+        }
+
+        int row = 1;
+        int prevPos = -1;
+        for (TopListEntry topListEntry : entries) {
+            List<PointsEntry> pointsEntries = topListEntry.getEntries();
+
+            int column = 0;
+            int position = topListEntry.getPosition();
+            String posText = prevPos != position ? position + "." : "";
+            prevPos = position;
+            overallToplist.setText(row, column++, posText);
+            overallToplist.setText(row, column++, topListEntry.getTeamName());
+            overallToplist.setText(row, column++, getPointsText(pointsEntries.get(0)));
+            overallToplist.setText(row, column++, getPointsText(pointsEntries.get(1)));
+            overallToplist.setText(row, column++, getPointsText(pointsEntries.get(2)));
+            overallToplist.setText(row, column, topListEntry.totalPoints() + "");
+            row++;
+        }
+
+        topListPanel.add(overallToplist);
+    }
+
+    private String getPointsText(PointsEntry pointsEntry) {
+        return pointsEntry.getPoints() + " (" + pointsEntry.getNumCorrectGames() + ")";
     }
 
     private void loadTeam() {
@@ -285,14 +329,14 @@ public class WebApp implements EntryPoint {
         resultsPanel.setStyleName("resultsPanel");
         resultsPanel.add(main);
         if (loginInfo.isAdmin()) {
-        Button saveButton = new Button("Spara");
-        saveButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                saveResults();
-            }
-        });
-        resultsPanel.add(saveButton);
+            Button saveButton = new Button("Spara");
+            saveButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    saveResults();
+                }
+            });
+            resultsPanel.add(saveButton);
         }
     }
 

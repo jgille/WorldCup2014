@@ -92,6 +92,18 @@ public class TopList implements Serializable {
         }
         TopList topList = new TopList();
         sort(topListEntries);
+        int position = 1;
+        int prevPoints = -1;
+        int count = 0;
+        for (TopListEntry entry : topListEntries) {
+            if (entry.totalPoints() < prevPoints) {
+                position += count;
+            }
+            entry.setPosition(position);
+            prevPoints = entry.totalPoints();
+            count++;
+        }
+
         topList.entries = topListEntries;
         return topList;
     }

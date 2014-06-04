@@ -7,6 +7,7 @@ public class TopListEntry implements Serializable {
 
     private String teamName;
     private List<PointsEntry> entries;
+    private int position;
 
     public String getTeamName() {
         return teamName;
@@ -38,5 +39,13 @@ public class TopListEntry implements Serializable {
                 "teamName='" + teamName + '\'' +
                 ", entries=" + entries +
                 '}';
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
+    public int getPosition() {
+        return position;
     }
 }

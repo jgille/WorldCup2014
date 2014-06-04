@@ -56,3 +56,15 @@ table {
     padding-right: 40px;
     border: 1px solid;
 }
+
+.topListPanel {
+    border-style: hidden !important;
+}
+
+.topListGrid {
+}
+
+.topListGrid td {
+    padding-right: 10px !important;
+    padding-left: 10px !important;
+}
