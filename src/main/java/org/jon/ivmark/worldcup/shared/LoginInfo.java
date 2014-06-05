@@ -10,6 +10,7 @@ public class LoginInfo implements Serializable {
     private String logoutUrl;
     private String emailAddress;
     private String nickname;
+    private boolean maySubmitPlay = true;
 
     public boolean isAdmin() {
         return isAdmin;
@@ -57,5 +58,13 @@ public class LoginInfo implements Serializable {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void setMaySubmitPlay(boolean maySubmitPlay) {
+        this.maySubmitPlay = maySubmitPlay;
+    }
+
+    public boolean maySubmitPlay() {
+        return maySubmitPlay;
     }
 }

@@ -3,6 +3,7 @@ package org.jon.ivmark.worldcup.server;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.common.io.Resources;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.jon.ivmark.worldcup.client.LoginService;
@@ -37,6 +38,8 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
         User user = userService.getCurrentUser();
         LoginInfo loginInfo = new LoginInfo();
 
+        loginInfo.setMaySubmitPlay(CutOff.isBeforeCutOff(DateTime.now()));
+
         if (user != null) {
             loginInfo.setLoggedIn(true);
             loginInfo.setEmailAddress(user.getEmail());
@@ -49,4 +52,5 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
         }
         return loginInfo;
     }
+
 }

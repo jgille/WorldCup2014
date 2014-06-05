@@ -40,6 +40,10 @@ public class WebApp implements EntryPoint {
     private List<Result> results;
     private VerticalPanel topListPanel = new VerticalPanel();
 
+    private Label playInfoLabel = new Label();
+
+    private boolean editable = true;
+
     public WebApp() {
         this.rounds = new ArrayList<>(Round.NUM_ROUNDS);
         for (int i = 0; i < Round.NUM_ROUNDS; i++) {
@@ -75,6 +79,7 @@ public class WebApp implements EntryPoint {
 
             public void onSuccess(LoginInfo result) {
                 loginInfo = result;
+                editable = loginInfo.maySubmitPlay();
                 if (loginInfo.isLoggedIn()) {
                     loadRounds();
                     loadToplist();
@@ -171,8 +176,15 @@ public class WebApp implements EntryPoint {
 
     private void loadWorldCupPage() {
         Grid mainGrid = new Grid(4, Round.NUM_ROUNDS);
+        VerticalPanel playPanel = new VerticalPanel();
+        playPanel.setStyleName("mainGrid");
         mainGrid.setStyleName("mainGrid");
 
+        playPanel.add(mainGrid);
+        if (!editable) {
+            playInfoLabel.setText("Du kan inte ändra dina spel längre, VM har börjat...");
+            playPanel.add(playInfoLabel);
+        }
         HTMLTable.CellFormatter cellFormatter = mainGrid.getCellFormatter();
 
         for (int col = 0; col < Round.NUM_ROUNDS; col++) {
@@ -243,7 +255,7 @@ public class WebApp implements EntryPoint {
         DockLayoutPanel mainPanel = new DockLayoutPanel(Style.Unit.EM);
 
         TabLayoutPanel tabs = new TabLayoutPanel(1.5, Style.Unit.EM);
-        tabs.add(mainGrid, "Dina spel");
+        tabs.add(playPanel, "Dina spel");
 
         tabs.add(resultsPanel, "Resultat");
         tabs.add(topListPanel, "Topplista");
@@ -420,7 +432,7 @@ public class WebApp implements EntryPoint {
         playService.savePlay(plays, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                RootPanel.get().add(new Label("Ooops, något gick åt skogen"));
+                Window.Location.reload();
             }
 
             @Override
@@ -444,6 +456,7 @@ public class WebApp implements EntryPoint {
                 checkBoxStateChanged(round, game, signIndex, event.getValue());
             }
         });
+        checkBox.setEnabled(editable);
         return checkBox;
     }
 
@@ -471,7 +484,7 @@ public class WebApp implements EntryPoint {
             label.removeStyleName("invalid");
         }
         Button saveButton = saveButtons.get(roundNumber);
-        saveButton.setEnabled(round.isValid());
+        saveButton.setEnabled(round.isValid() && editable);
     }
 
     private Play getGame(int gameNumber, Round round) {

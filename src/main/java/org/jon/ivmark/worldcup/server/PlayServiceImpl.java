@@ -3,6 +3,7 @@ package org.jon.ivmark.worldcup.server;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.jon.ivmark.worldcup.client.PlayService;
 import org.jon.ivmark.worldcup.client.domain.Round;
@@ -21,6 +22,9 @@ public class PlayServiceImpl extends RemoteServiceServlet implements PlayService
 
     @Override
     public void savePlay(PlaysDto plays) {
+        if (!CutOff.isBeforeCutOff(DateTime.now())) {
+            throw new IllegalStateException("Too late!");
+        }
         User currentUser = getCurrentUser();
         LOGGER.info("Saving play for user: " + currentUser.getNickname());
         playsRepository.save(currentUser, plays);
