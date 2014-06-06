@@ -14,6 +14,7 @@ import org.jon.ivmark.worldcup.shared.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -43,6 +44,8 @@ public class WebApp implements EntryPoint {
     private Label playInfoLabel = new Label();
 
     private boolean editable = true;
+
+    private VerticalPanel allPlaysPanel = new VerticalPanel();
 
     public WebApp() {
         this.rounds = new ArrayList<>(Round.NUM_ROUNDS);
@@ -84,7 +87,6 @@ public class WebApp implements EntryPoint {
                     loadRounds();
                     loadToplist();
                     loadTeam();
-                    loadResultPage();
                 } else {
                     loadLogin();
                 }
@@ -174,7 +176,7 @@ public class WebApp implements EntryPoint {
         Window.Location.assign(loginInfo.getLoginUrl());
     }
 
-    private void loadWorldCupPage() {
+    private void renderAll() {
         Grid mainGrid = new Grid(4, Round.NUM_ROUNDS);
         VerticalPanel playPanel = new VerticalPanel();
         playPanel.setStyleName("mainGrid");
@@ -192,37 +194,10 @@ public class WebApp implements EntryPoint {
             cellFormatter.setStyleName(0, col, "tableHeading");
         }
 
-        Games games = Games.allGames();
-
         for (int roundIndex = 0; roundIndex < Round.NUM_ROUNDS; roundIndex++) {
-            Grid grid = new Grid(Round.NUM_GAMES + 1, 4);
-            grid.setStyleName("roundTable");
-
-            grid.setText(0, 0, "");
-            grid.setText(0, 1, "1");
-            grid.setText(0, 2, "X");
-            grid.setText(0, 3, "2");
-
             Round round = getRound(roundIndex);
 
-            for (int gameIndex = 0; gameIndex < Round.NUM_GAMES; gameIndex++) {
-                GameId gameId = new GameId(roundIndex, gameIndex);
-                Game game = games.get(gameId);
-                Label gameLabel = new Label(game.label());
-                int row = gameIndex + 1;
-                grid.setWidget(row, 0, gameLabel);
-
-                Play play = round.getPlay(gameIndex);
-
-                CheckBox checkBoxOne = createCheckBox(roundIndex, gameIndex, ONE_INDEX, play.isOneChecked());
-                grid.setWidget(row, 1, checkBoxOne);
-
-                CheckBox checkBoxX = createCheckBox(roundIndex, gameIndex, X_INDEX, play.isXChecked());
-                grid.setWidget(row, 2, checkBoxX);
-
-                CheckBox checkBoxTwo = createCheckBox(roundIndex, gameIndex, TWO_INDEX, play.isTwoChecked());
-                grid.setWidget(row, 3, checkBoxTwo);
-            }
+            Grid grid = getPlayGrid(roundIndex, getRound(roundIndex), results.get(roundIndex));
 
             HTMLTable.CellFormatter cellFormatter1X2 = grid.getCellFormatter();
             for (int r = 0; r < 17; r++) {
@@ -255,11 +230,11 @@ public class WebApp implements EntryPoint {
         DockLayoutPanel mainPanel = new DockLayoutPanel(Style.Unit.EM);
 
         TabLayoutPanel tabs = new TabLayoutPanel(1.5, Style.Unit.EM);
-        tabs.add(playPanel, "Dina spel");
+        tabs.add(new ScrollPanel(playPanel), "Dina spel");
 
-        tabs.add(resultsPanel, "Resultat");
-        tabs.add(topListPanel, "Topplista");
-        tabs.add(new Label("Inte tillgängliga ännu."), "Alla spel");
+        tabs.add(new ScrollPanel(resultsPanel), "Resultat");
+        tabs.add(new ScrollPanel(topListPanel), "Topplista");
+        tabs.add(new ScrollPanel(allPlaysPanel), "Alla spel");
 
         HorizontalPanel settingsPanel = new HorizontalPanel();
         settingsPanel.add(new Label("Lagnamn:"));
@@ -268,7 +243,7 @@ public class WebApp implements EntryPoint {
         settingsPanel.setStyleName("settingsPanel");
         tabs.add(settingsPanel, "Inställningar");
 
-        tabs.add(new HTML(Rules.rulesHtml()), "Regler");
+        tabs.add(new ScrollPanel(new HTML(Rules.rulesHtml())), "Regler");
 
         DockLayoutPanel header = new DockLayoutPanel(Style.Unit.EM);
 
@@ -279,6 +254,43 @@ public class WebApp implements EntryPoint {
         mainPanel.add(tabs);
 
         RootLayoutPanel.get().add(mainPanel);
+    }
+
+    private Grid getPlayGrid(int roundIndex, Round round, Result result) {
+        Games games = Games.allGames();
+
+        Grid grid = new Grid(Round.NUM_GAMES + 1, 4);
+        grid.setStyleName("roundTable");
+
+        grid.setText(0, 0, "");
+        grid.setText(0, 1, "1");
+        grid.setText(0, 2, "X");
+        grid.setText(0, 3, "2");
+
+        List<GameResult> resultList = result.getResults();
+        for (int gameIndex = 0; gameIndex < Round.NUM_GAMES; gameIndex++) {
+            GameResult gameResult = resultList.get(gameIndex);
+            GameId gameId = new GameId(roundIndex, gameIndex);
+            Game game = games.get(gameId);
+            Label gameLabel = new Label(game.label());
+            int row = gameIndex + 1;
+            grid.setWidget(row, 0, gameLabel);
+
+            Play play = round.getPlay(gameIndex);
+
+            CheckBox checkBoxOne = createCheckBox(roundIndex, gameIndex, ONE_INDEX, play.isOneChecked(),
+                                                  gameResult == GameResult.ONE);
+            grid.setWidget(row, 1, checkBoxOne);
+
+            CheckBox checkBoxX = createCheckBox(roundIndex, gameIndex, X_INDEX, play.isXChecked(),
+                                                gameResult == GameResult.X);
+            grid.setWidget(row, 2, checkBoxX);
+
+            CheckBox checkBoxTwo = createCheckBox(roundIndex, gameIndex, TWO_INDEX, play.isTwoChecked(),
+                                                  gameResult == GameResult.TWO);
+            grid.setWidget(row, 3, checkBoxTwo);
+        }
+        return grid;
     }
 
     private void loadResultPage() {
@@ -292,8 +304,57 @@ public class WebApp implements EntryPoint {
             public void onSuccess(List<Result> results) {
                 WebApp.this.results = results;
                 renderResultsPanel();
+                loadAllPlays();
+                renderAll();
             }
         });
+    }
+
+    private void loadAllPlays() {
+        PlayServiceAsync playService = GWT.create(PlayService.class);
+        playService.loadAllCompletePlays(new AsyncCallback<Map<String, List<PlaysDto>>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(Map<String, List<PlaysDto>> allPlays) {
+                renderAllPlays(allPlays);
+            }
+        });
+    }
+
+    private void renderAllPlays(Map<String, List<PlaysDto>> allPlays) {
+
+        int row = 0;
+        for (Map.Entry<String, List<PlaysDto>> e : allPlays.entrySet()) {
+            Grid mainGrid = new Grid(4, Round.NUM_ROUNDS);
+            mainGrid.setStyleName("mainGrid");
+            HTMLTable.CellFormatter cellFormatter = mainGrid.getCellFormatter();
+
+            for (int col = 0; col < Round.NUM_ROUNDS; col++) {
+                mainGrid.setText(0, col, "Omgång " + (col + 1));
+                cellFormatter.setStyleName(0, col, "tableHeading");
+            }
+
+            String teamName = e.getKey();
+            List<PlaysDto> plays = e.getValue();
+            Label label = new Label(teamName);
+            label.setStyleName("h1");
+
+            int roundIndex = 0;
+            for (PlaysDto playsDto : plays) {
+                Result result = results.get(roundIndex);
+
+                Grid grid = getPlayGrid(roundIndex, Round.fromPlaysDto(playsDto), result);
+                mainGrid.setWidget(row + 1, roundIndex, grid);
+                roundIndex++;
+            }
+
+            allPlaysPanel.add(label);
+            allPlaysPanel.add(mainGrid);
+            row++;
+        }
     }
 
     private void renderResultsPanel() {
@@ -420,7 +481,8 @@ public class WebApp implements EntryPoint {
                     Round round = Round.fromPlaysDto(playsDto);
                     rounds.add(round);
                 }
-                loadWorldCupPage();
+                loadResultPage();
+
             }
         });
 
@@ -447,7 +509,8 @@ public class WebApp implements EntryPoint {
         return rounds.get(roundIndex);
     }
 
-    private CheckBox createCheckBox(final int round, final int game, final int signIndex, boolean check) {
+    private CheckBox createCheckBox(final int round, final int game, final int signIndex, boolean check,
+                                    boolean correct) {
         CheckBox checkBox = new CheckBox();
         checkBox.setValue(check);
         checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -457,6 +520,9 @@ public class WebApp implements EntryPoint {
             }
         });
         checkBox.setEnabled(editable);
+        if (correct) {
+            checkBox.setStyleName("correct");
+        }
         return checkBox;
     }
 

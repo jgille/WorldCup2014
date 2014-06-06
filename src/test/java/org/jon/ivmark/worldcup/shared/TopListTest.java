@@ -20,7 +20,6 @@ public class TopListTest {
         for (int roundIndex = 0; roundIndex < 3; roundIndex++) {
             results.add(createResult(roundIndex));
         }
-
     }
 
     private Result createResult(int roundIndex) {
@@ -38,14 +37,14 @@ public class TopListTest {
         plays.add(allPlaysWith(1, GameResult.X));
         plays.add(allPlaysWith(2, GameResult.TWO));
 
-        String teamName = "test";
-        TopList topList = TopList.computeTopList(results, Collections.singletonMap(teamName, plays));
+        String userId = "test";
+        TopList topList = TopList.computeTopList(results, Collections.singletonMap(userId, plays));
 
         List<TopListEntry> entries = topList.getEntries();
         assertEquals(1, entries.size());
 
         TopListEntry topListEntry = entries.get(0);
-        assertEquals(teamName, topListEntry.getTeamName());
+        assertEquals(userId, topListEntry.getTeamName());
 
         assertEquals(0, topListEntry.totalPoints());
 
@@ -69,14 +68,14 @@ public class TopListTest {
     public void computeTopListFromSingleTeamWithFullPoints() {
         List<PlaysDto> plays = getPlaysDtosAllCorrect();
 
-        String teamName = "test";
-        TopList topList = TopList.computeTopList(results, Collections.singletonMap(teamName, plays));
+        String userId = "test";
+        TopList topList = TopList.computeTopList(results, Collections.singletonMap(userId, plays));
 
         List<TopListEntry> entries = topList.getEntries();
         assertEquals(1, entries.size());
 
         TopListEntry topListEntry = entries.get(0);
-        assertEquals(teamName, topListEntry.getTeamName());
+        assertEquals(userId, topListEntry.getTeamName());
 
         assertEquals(300_000, topListEntry.totalPoints());
 

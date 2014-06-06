@@ -1,6 +1,7 @@
 package org.jon.ivmark.worldcup.shared;
 
 import org.jon.ivmark.worldcup.client.domain.Round;
+import org.jon.ivmark.worldcup.server.TeamRepository;
 
 import java.io.Serializable;
 import java.util.*;
@@ -20,7 +21,8 @@ public class TopList implements Serializable {
         this.entries = entries;
     }
 
-    public static TopList computeTopList(List<Result> results, Map<String, List<PlaysDto>> playsByTeam) {
+    public static TopList computeTopList(List<Result> results,
+                                         Map<String, List<PlaysDto>> playsByTeam) {
         sortResults(results);
 
         List<TopListEntry> topListEntries = new ArrayList<>();
@@ -29,9 +31,9 @@ public class TopList implements Serializable {
             List<PlaysDto> plays = e.getValue();
             sortPlays(plays);
 
-            String teamName = e.getKey();
+            String team = e.getKey();
             TopListEntry topListEntry = new TopListEntry();
-            topListEntry.setTeamName(teamName);
+            topListEntry.setTeamName(team);
             List<PointsEntry> pointsEntries = new ArrayList<>();
             topListEntry.setEntries(pointsEntries);
             topListEntries.add(topListEntry);

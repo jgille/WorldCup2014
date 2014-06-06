@@ -10,7 +10,9 @@ import org.jon.ivmark.worldcup.client.domain.Round;
 import org.jon.ivmark.worldcup.shared.PlaysDto;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class PlayServiceImpl extends RemoteServiceServlet implements PlayService {
@@ -22,7 +24,7 @@ public class PlayServiceImpl extends RemoteServiceServlet implements PlayService
 
     @Override
     public void savePlay(PlaysDto plays) {
-        if (!CutOff.isBeforeCutOff(DateTime.now())) {
+        if (!CutOff.isBeforeCutOff()) {
             throw new IllegalStateException("Too late!");
         }
         User currentUser = getCurrentUser();
@@ -53,6 +55,25 @@ public class PlayServiceImpl extends RemoteServiceServlet implements PlayService
     public void setTeamName(String teamName) {
         User currentUser = getCurrentUser();
         teamRepository.setTeamName(currentUser, teamName);
+    }
+
+    @Override
+    public Map<String, List<PlaysDto>> loadAllCompletePlays() {
+        Map<String, List<PlaysDto>> result = new HashMap<>();
+
+        if (CutOff.isBeforeCutOff()) {
+            return result;
+        }
+
+        Map<String, List<PlaysDto>> playsByUser = playsRepository.getAll().byUserWithAllRoundsSubmitted();
+
+        for (Map.Entry<String, List<PlaysDto>> e : playsByUser.entrySet()) {
+            String userId = e.getKey();
+            String teamName = teamRepository.getTeamName(userId);
+            result.put(teamName, e.getValue());
+        }
+        LOGGER.info("Loaded all plays");
+        return result;
     }
 
     private User getCurrentUser() {

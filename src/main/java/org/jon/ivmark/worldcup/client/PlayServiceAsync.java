@@ -7,6 +7,7 @@ import org.jon.ivmark.worldcup.shared.LoginInfo;
 import org.jon.ivmark.worldcup.shared.PlaysDto;
 
 import java.util.List;
+import java.util.Map;
 
 public interface PlayServiceAsync {
 
@@ -17,4 +18,6 @@ public interface PlayServiceAsync {
     void getTeamName(AsyncCallback<String> async);
 
     void setTeamName(String teamName, AsyncCallback<Void> async);
+
+    void loadAllCompletePlays(AsyncCallback<Map<String, List<PlaysDto>>> async);
 }

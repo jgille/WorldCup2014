@@ -6,6 +6,7 @@ import org.jon.ivmark.worldcup.shared.LoginInfo;
 import org.jon.ivmark.worldcup.shared.PlaysDto;
 
 import java.util.List;
+import java.util.Map;
 
 @RemoteServiceRelativePath("play")
 public interface PlayService extends RemoteService {
@@ -17,5 +18,7 @@ public interface PlayService extends RemoteService {
     String getTeamName();
 
     void setTeamName(String teamName);
+
+    Map<String, List<PlaysDto>> loadAllCompletePlays();
 
 }

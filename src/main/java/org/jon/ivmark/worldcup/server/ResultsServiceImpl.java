@@ -7,6 +7,7 @@ import org.jon.ivmark.worldcup.client.domain.Round;
 import org.jon.ivmark.worldcup.shared.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -60,24 +61,27 @@ public class ResultsServiceImpl extends RemoteServiceServlet implements ResultsS
         }
         datastoreService.put(entity);
         LOGGER.info("Saved result: " + result);
-
     }
 
     @Override
     public TopList getTopList() {
-        Map<String,List<PlaysDto>> playsByTeam = playsRepository.getAll().byTeamNameWithAllRoundsSubmitted();
+        Map<String, List<PlaysDto>> playsByUser = playsRepository.getAll().byUserWithAllRoundsSubmitted();
         List<Result> results = loadResults();
 
-        TopList topList = TopList.computeTopList(results, playsByTeam);
-        for (TopListEntry topListEntry : topList.getEntries()) {
-            topListEntry.setTeamName(getTeamName(topListEntry.getTeamName()));
+        Map<String, List<PlaysDto>> playsByTeam = new HashMap<>();
+        for (Map.Entry<String, List<PlaysDto>> e : playsByUser.entrySet()) {
+            String teamName = getTeamName(e.getKey());
+            playsByTeam.put(teamName, e.getValue());
         }
+
+        TopList topList = TopList.computeTopList(results, playsByTeam);
+
         LOGGER.info("Loaded top list");
         return topList;
     }
 
-    private String getTeamName(String teamName) {
-        return teamRepository.getTeamName(teamName);
+    private String getTeamName(String userId) {
+        return teamRepository.getTeamName(userId);
     }
 
     private Key getKey(int roundIndex) {

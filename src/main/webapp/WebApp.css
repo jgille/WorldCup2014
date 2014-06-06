@@ -68,3 +68,17 @@ table {
     padding-right: 10px !important;
     padding-left: 10px !important;
 }
+
+.h1 {
+    font-size: 24px;
+    color: #ADFF2F;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 3px;
+}
+
+.correct {
+    border-color: #008000 !important;
+}
+
+

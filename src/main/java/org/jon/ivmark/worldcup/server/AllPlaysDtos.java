@@ -15,7 +15,7 @@ public class AllPlaysDtos {
         this.allPlays = allPlays;
     }
 
-    public Map<String, List<PlaysDto>> byTeamNameWithAllRoundsSubmitted() {
+    public Map<String, List<PlaysDto>> byUserWithAllRoundsSubmitted() {
         Map<String, List<PlaysDto>> byUser = new HashMap<>();
 
         for (PlaysDto playsDto : allPlays) {
