@@ -326,15 +326,16 @@ public class WebApp implements EntryPoint {
 
     private void renderAllPlays(Map<String, List<PlaysDto>> allPlays) {
 
-        int row = 0;
         for (Map.Entry<String, List<PlaysDto>> e : allPlays.entrySet()) {
-            Grid mainGrid = new Grid(4, Round.NUM_ROUNDS);
+            int row = 0;
+
+            Grid mainGrid = new Grid(2, Round.NUM_ROUNDS);
             mainGrid.setStyleName("mainGrid");
             HTMLTable.CellFormatter cellFormatter = mainGrid.getCellFormatter();
 
             for (int col = 0; col < Round.NUM_ROUNDS; col++) {
-                mainGrid.setText(0, col, "Omgång " + (col + 1));
-                cellFormatter.setStyleName(0, col, "tableHeading");
+                mainGrid.setText(row, col, "Omgång " + (col + 1));
+                cellFormatter.setStyleName(row, col, "tableHeading");
             }
 
             String teamName = e.getKey();
@@ -353,7 +354,6 @@ public class WebApp implements EntryPoint {
 
             allPlaysPanel.add(label);
             allPlaysPanel.add(mainGrid);
-            row++;
         }
     }
 

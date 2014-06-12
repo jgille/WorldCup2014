@@ -26,7 +26,7 @@ public class ResultsServiceImpl extends RemoteServiceServlet implements ResultsS
         for (int roundIndex = 0; roundIndex < Round.NUM_ROUNDS; roundIndex++) {
             results.add(loadResult(roundIndex));
         }
-        LOGGER.info("Loaded results " + results);
+        LOGGER.info("Loaded results.");
         return results;
     }
 

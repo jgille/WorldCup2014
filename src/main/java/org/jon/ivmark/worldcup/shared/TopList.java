@@ -114,9 +114,14 @@ public class TopList implements Serializable {
         Collections.sort(topListEntries, new Comparator<TopListEntry>() {
             @Override
             public int compare(TopListEntry entry1, TopListEntry entry2) {
-                int diff = entry2.totalPoints() - entry1.totalPoints();
-                if (diff != 0) {
-                    return diff;
+                int pointsDiff = entry2.totalPoints() - entry1.totalPoints();
+                if (pointsDiff != 0) {
+                    return pointsDiff;
+                }
+
+                int correctDiff = entry2.totalNumCorrect() - entry1.totalNumCorrect();
+                if (correctDiff != 0) {
+                    return correctDiff;
                 }
                 return entry1.getTeamName().compareTo(entry2.getTeamName());
             }

@@ -26,6 +26,14 @@ public class TopListEntry implements Serializable {
         this.entries = entries;
     }
 
+    public int totalNumCorrect() {
+        int total = 0;
+        for (PointsEntry pe : entries) {
+            total += pe.getNumCorrectGames();
+        }
+        return total;
+    }
+
     public int totalPoints() {
         int total = 0;
         for (PointsEntry pe : entries) {

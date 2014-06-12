@@ -7,6 +7,8 @@ import org.jon.ivmark.worldcup.shared.PlayDto;
 import org.jon.ivmark.worldcup.shared.PlaysDto;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class DataStorePlaysRepository implements PlaysRepository {
@@ -52,12 +54,17 @@ public class DataStorePlaysRepository implements PlaysRepository {
     public AllPlaysDtos getAll() {
         Query query = new Query(KIND);
         DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
-        Iterable<Entity> entities = datastoreService.prepare(query).asIterable(FetchOptions.Builder.withLimit(500));
+        Iterable<Entity> entities = datastoreService.prepare(query).asIterable(FetchOptions.Builder.withLimit(10000));
         List<PlaysDto> plays = new ArrayList<>();
         for (Entity entity : entities) {
             plays.add(playsFromEntity(entity));
         }
-
+        Collections.sort(plays, new Comparator<PlaysDto>() {
+            @Override
+            public int compare(PlaysDto o1, PlaysDto o2) {
+                return o1.roundIndex - o2.roundIndex;
+            }
+        });
         return new AllPlaysDtos(plays);
     }
 
