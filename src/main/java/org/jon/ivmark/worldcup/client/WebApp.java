@@ -47,6 +47,9 @@ public class WebApp implements EntryPoint {
 
     private VerticalPanel allPlaysPanel = new VerticalPanel();
 
+    private VerticalPanel similaritiesPanel = new VerticalPanel();
+
+
     public WebApp() {
         this.rounds = new ArrayList<>(Round.NUM_ROUNDS);
         for (int i = 0; i < Round.NUM_ROUNDS; i++) {
@@ -235,6 +238,7 @@ public class WebApp implements EntryPoint {
         tabs.add(new ScrollPanel(resultsPanel), "Resultat");
         tabs.add(new ScrollPanel(topListPanel), "Topplista");
         tabs.add(new ScrollPanel(allPlaysPanel), "Alla spel");
+        tabs.add(new ScrollPanel(similaritiesPanel), "Likhet med andra spelare");
 
         HorizontalPanel settingsPanel = new HorizontalPanel();
         settingsPanel.add(new Label("Lagnamn:"));
@@ -319,9 +323,49 @@ public class WebApp implements EntryPoint {
             }
 
             @Override
-            public void onSuccess(SimilarityMatrix result) {
+            public void onSuccess(SimilarityMatrix similarityMatrix) {
+                renderSimilarities(similarityMatrix);
             }
         });
+    }
+
+    private void renderSimilarities(SimilarityMatrix similarityMatrix) {
+        List<String> teams = similarityMatrix.getTeams();
+        int[][] similarities = similarityMatrix.getSimilarities();
+        Grid grid = new Grid(teams.size() + 1, teams.size() + 1);
+        grid.setStyleName("similarityGrid");
+
+        int teamIndex = 1;
+        for (String team : teams) {
+            Label rowHeader = new Label(team);
+            grid.setWidget(0, teamIndex, rowHeader);
+            Label columnHeader = new Label(team);
+            grid.setWidget(teamIndex, 0, columnHeader);
+
+            int colIndex = 1;
+            for (int similarity : similarities[teamIndex - 1]) {
+                Label simLabel = new Label(similarity + " %");
+                if (teamIndex != colIndex) {
+                    Style style = simLabel.getElement().getStyle();
+                    style.setBackgroundColor(getSimilarityColor(similarity));
+                } else {
+                    simLabel.setText("-");
+                }
+                grid.setWidget(teamIndex, colIndex++, simLabel);
+            }
+
+            teamIndex++;
+        }
+
+        similaritiesPanel.add(grid);
+    }
+
+    private String getSimilarityColor(int similarity) {
+        double sim = similarity / 100d;
+        int green = (int) (200 * sim);
+        int red = 200 - green;
+        int blue = red;
+        return "rgb(" + red + "," + green + "," + blue + ")";
     }
 
     private void loadAllPlays() {

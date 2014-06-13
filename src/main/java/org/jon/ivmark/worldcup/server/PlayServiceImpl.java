@@ -94,17 +94,15 @@ public class PlayServiceImpl extends RemoteServiceServlet implements PlayService
                 List<PlaysDto> playsDtos = allPlays.get(team);
                 List<PlaysDto> otherPlaysDtos = allPlays.get(otherTeam);
 
-                PlaySimilarity similarity =
-                        playsDtos.get(0).calculateSimilarityWith(otherPlaysDtos.get(0))
-                                 .add(playsDtos.get(1).calculateSimilarityWith(otherPlaysDtos.get(1))
-                                               .add(playsDtos.get(2).calculateSimilarityWith(otherPlaysDtos.get(2))));
+                double similarity = 0;
+                for (int i = 0; i < 3; i++) {
+                    PlaysDto plays = playsDtos.get(i);
+                    PlaysDto otherPlays = otherPlaysDtos.get(i);
+                    similarity += plays.calculateSimilarityWith(otherPlays);
+                }
 
-                LOGGER.info("Calculating similarities between " + team + " and " + otherTeam);
-                int sim = similarity.similarityPercentage();
-                LOGGER.info("Num different: " + similarity.getNumDifferent()
-                                    + ", num checked: " + similarity.getNumChecked()
-                                    + ", similarity: " + sim);
-                simArr[otherIndex++] = sim;
+                int similarityPercentage = (int) Math.round((100 * similarity) / (3 * Round.NUM_GAMES));
+                simArr[otherIndex++] = similarityPercentage;
             }
             index++;
         }

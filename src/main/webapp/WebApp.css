@@ -81,4 +81,8 @@ table {
     background-color: #008000 !important;
 }
 
+.similarityGrid {
+    border: 1px solid;
+}
+
 

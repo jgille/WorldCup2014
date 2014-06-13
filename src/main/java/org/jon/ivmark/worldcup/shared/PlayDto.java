@@ -44,4 +44,20 @@ public class PlayDto implements Serializable {
         }
         return difference;
     }
+
+    private int numChecked() {
+        return asString().length();
+    }
+
+    public double similarityWith(PlayDto otherPlay) {
+        int maxNumChecked = Math.max(numChecked(), otherPlay.numChecked());
+
+        int same = 0;
+        for (int i = 0; i < 3; i++) {
+            if (checked[i] && otherPlay.checked[i]) {
+                same++;
+            }
+        }
+        return (1d * same) / maxNumChecked;
+    }
 }

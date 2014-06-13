@@ -31,53 +31,15 @@ public class PlaysDto implements Serializable {
         return numCorrect;
     }
 
-    public PlaySimilarity calculateSimilarityWith(PlaysDto other) {
-        PlaysDto play1;
-        PlaysDto play2;
-        int maxNumChecked;
-
-        int numChecked = numChecked();
-        int otherNumChecked = other.numChecked();
-        if (numChecked > otherNumChecked) {
-            maxNumChecked = numChecked;
-            play1 = this;
-            play2 = other;
-        } else if (numChecked < otherNumChecked || userId.compareTo(other.userId) < 0) {
-            maxNumChecked = otherNumChecked;
-            play1 = other;
-            play2 = this;
-        } else {
-            maxNumChecked = numChecked;
-            play1 = this;
-            play2 = other;
-        }
-
-        int numDifferent = 0;
+    public double calculateSimilarityWith(PlaysDto other) {
+        double similarity = 0;
 
         for (int gameIndex = 0; gameIndex < plays.length; gameIndex++) {
-            PlayDto play = play1.plays[gameIndex];
-            PlayDto otherPlay = play2.plays[gameIndex];
-            numDifferent += play.difference(otherPlay);
+            PlayDto play = plays[gameIndex];
+            PlayDto otherPlay = other.plays[gameIndex];
+            similarity += play.similarityWith(otherPlay);
         }
 
-        return new PlaySimilarity(numDifferent, maxNumChecked);
-    }
-
-    int numChecked() {
-        int result = 0;
-        for (PlayDto playDto : plays) {
-            result += numChecked(playDto.checked);
-        }
-        return result;
-    }
-
-    private int numChecked(boolean[] checked) {
-        int result = 0;
-        for (boolean b : checked) {
-            if (b) {
-                result++;
-            }
-        }
-        return result;
+        return similarity;
     }
 }
