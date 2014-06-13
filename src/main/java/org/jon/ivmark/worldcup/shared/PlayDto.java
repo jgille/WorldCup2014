@@ -34,4 +34,14 @@ public class PlayDto implements Serializable {
     public boolean isCorrect(GameResult result) {
         return result != GameResult.UNKNOWN && checked[result.intValue()];
     }
+
+    public int difference(PlayDto otherPlay) {
+        int difference = 0;
+        for (int i = 0; i < 3; i++) {
+            if (checked[i] && !otherPlay.checked[i]) {
+                difference++;
+            }
+        }
+        return difference;
+    }
 }

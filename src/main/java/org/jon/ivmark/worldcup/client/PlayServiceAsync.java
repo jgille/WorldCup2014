@@ -5,6 +5,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import org.jon.ivmark.worldcup.shared.LoginInfo;
 import org.jon.ivmark.worldcup.shared.PlaysDto;
+import org.jon.ivmark.worldcup.shared.SimilarityMatrix;
 
 import java.util.List;
 import java.util.Map;
@@ -20,4 +21,6 @@ public interface PlayServiceAsync {
     void setTeamName(String teamName, AsyncCallback<Void> async);
 
     void loadAllCompletePlays(AsyncCallback<Map<String, List<PlaysDto>>> async);
+
+    void loadSimilarities(AsyncCallback<SimilarityMatrix> async);
 }

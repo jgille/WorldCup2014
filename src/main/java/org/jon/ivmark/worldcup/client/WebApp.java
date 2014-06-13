@@ -305,7 +305,21 @@ public class WebApp implements EntryPoint {
                 WebApp.this.results = results;
                 renderResultsPanel();
                 loadAllPlays();
+                loadSimilarities();
                 renderAll();
+            }
+        });
+    }
+
+    private void loadSimilarities() {
+        PlayServiceAsync playService = GWT.create(PlayService.class);
+        playService.loadSimilarities(new AsyncCallback<SimilarityMatrix>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(SimilarityMatrix result) {
             }
         });
     }

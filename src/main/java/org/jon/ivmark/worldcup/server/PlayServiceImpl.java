@@ -7,12 +7,11 @@ import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.jon.ivmark.worldcup.client.PlayService;
 import org.jon.ivmark.worldcup.client.domain.Round;
+import org.jon.ivmark.worldcup.shared.PlaySimilarity;
 import org.jon.ivmark.worldcup.shared.PlaysDto;
+import org.jon.ivmark.worldcup.shared.SimilarityMatrix;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class PlayServiceImpl extends RemoteServiceServlet implements PlayService {
@@ -74,6 +73,45 @@ public class PlayServiceImpl extends RemoteServiceServlet implements PlayService
         }
         LOGGER.info("Loaded all plays");
         return result;
+    }
+
+    @Override
+    public SimilarityMatrix loadSimilarities() {
+        Map<String, List<PlaysDto>> allPlays = loadAllCompletePlays();
+
+        ArrayList<String> teams = new ArrayList<>(allPlays.keySet());
+        Collections.sort(teams);
+
+        int[][] similarities = new int[teams.size()][];
+
+        int index = 0;
+
+        for (String team : teams) {
+            int[] simArr = new int[teams.size()];
+            similarities[index] = simArr;
+            int otherIndex = 0;
+            for (String otherTeam : teams) {
+                List<PlaysDto> playsDtos = allPlays.get(team);
+                List<PlaysDto> otherPlaysDtos = allPlays.get(otherTeam);
+
+                PlaySimilarity similarity =
+                        playsDtos.get(0).calculateSimilarityWith(otherPlaysDtos.get(0))
+                                 .add(playsDtos.get(1).calculateSimilarityWith(otherPlaysDtos.get(1))
+                                               .add(playsDtos.get(2).calculateSimilarityWith(otherPlaysDtos.get(2))));
+
+                LOGGER.info("Calculating similarities between " + team + " and " + otherTeam);
+                int sim = similarity.similarityPercentage();
+                LOGGER.info("Num different: " + similarity.getNumDifferent()
+                                    + ", num checked: " + similarity.getNumChecked()
+                                    + ", similarity: " + sim);
+                simArr[otherIndex++] = sim;
+            }
+            index++;
+        }
+
+        SimilarityMatrix similarityMatrix = new SimilarityMatrix(teams, similarities);
+        LOGGER.info("Loaded similarity matrics: " + similarityMatrix);
+        return similarityMatrix;
     }
 
     private User getCurrentUser() {

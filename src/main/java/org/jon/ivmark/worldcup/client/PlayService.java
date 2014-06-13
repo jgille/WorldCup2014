@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import org.jon.ivmark.worldcup.shared.LoginInfo;
 import org.jon.ivmark.worldcup.shared.PlaysDto;
+import org.jon.ivmark.worldcup.shared.SimilarityMatrix;
 
 import java.util.List;
 import java.util.Map;
@@ -20,5 +21,7 @@ public interface PlayService extends RemoteService {
     void setTeamName(String teamName);
 
     Map<String, List<PlaysDto>> loadAllCompletePlays();
+
+    SimilarityMatrix loadSimilarities();
 
 }
