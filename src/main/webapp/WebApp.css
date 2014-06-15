@@ -85,4 +85,16 @@ table {
     border: 1px solid;
 }
 
+.howPeoplePlayed {
+    font-size: 8pt;
+    padding-bottom: 4pt;
+    padding-right: 2pt;
+}
+
+.howPeoplePlayedLabel {
+    font-size: 8pt;
+    padding-bottom: 4pt;
+    text-align: right;
+}
+
 

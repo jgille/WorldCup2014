@@ -148,7 +148,8 @@ public class WebApp implements EntryPoint {
             overallToplist.setText(row, column++, getPointsText(pointsEntries.get(0)));
             overallToplist.setText(row, column++, getPointsText(pointsEntries.get(1)));
             overallToplist.setText(row, column++, getPointsText(pointsEntries.get(2)));
-            overallToplist.setText(row, column, topListEntry.totalPoints() + " (" + topListEntry.totalNumCorrect() + ")");
+            overallToplist.setText(row, column, topListEntry.totalPoints() + " (" + topListEntry.totalNumCorrect() +
+                    ")");
             row++;
         }
 
@@ -200,7 +201,7 @@ public class WebApp implements EntryPoint {
         for (int roundIndex = 0; roundIndex < Round.NUM_ROUNDS; roundIndex++) {
             Round round = getRound(roundIndex);
 
-            Grid grid = getPlayGrid(roundIndex, getRound(roundIndex), results.get(roundIndex));
+            Grid grid = getPlayGrid(roundIndex, getRound(roundIndex), results.get(roundIndex), null, 1);
 
             HTMLTable.CellFormatter cellFormatter1X2 = grid.getCellFormatter();
             for (int r = 0; r < 17; r++) {
@@ -260,10 +261,20 @@ public class WebApp implements EntryPoint {
         RootLayoutPanel.get().add(mainPanel);
     }
 
-    private Grid getPlayGrid(int roundIndex, Round round, Result result) {
+    private Grid getPlayGrid(int roundIndex, Round round, Result result, List<Plays> howPeoplePlayed, int numPlayers) {
         Games games = Games.allGames();
 
-        Grid grid = new Grid(Round.NUM_GAMES + 1, 4);
+        int numRows = howPeoplePlayed != null ? Round.NUM_GAMES * 2 + 1 : Round.NUM_GAMES + 1;
+
+        Grid grid = new Grid(numRows, 4);
+        HTMLTable.CellFormatter cellFormatter = grid.getCellFormatter();
+
+        for (int r = 0; r < numRows; r++) {
+            for (int c = 1; c < 4; c++) {
+                cellFormatter.setHorizontalAlignment(r, c, HasHorizontalAlignment.ALIGN_CENTER);
+            }
+        }
+
         grid.setStyleName("roundTable");
 
         grid.setText(0, 0, "");
@@ -272,12 +283,12 @@ public class WebApp implements EntryPoint {
         grid.setText(0, 3, "2");
 
         List<GameResult> resultList = result.getResults();
+        int row = 1;
         for (int gameIndex = 0; gameIndex < Round.NUM_GAMES; gameIndex++) {
             GameResult gameResult = resultList.get(gameIndex);
             GameId gameId = new GameId(roundIndex, gameIndex);
             Game game = games.get(gameId);
             Label gameLabel = new Label(game.label());
-            int row = gameIndex + 1;
             grid.setWidget(row, 0, gameLabel);
 
             Play play = round.getPlay(gameIndex);
@@ -293,6 +304,25 @@ public class WebApp implements EntryPoint {
             CheckBox checkBoxTwo = createCheckBox(roundIndex, gameIndex, TWO_INDEX, play.isTwoChecked(),
                                                   gameResult == GameResult.TWO);
             grid.setWidget(row, 3, checkBoxTwo);
+
+            row++;
+
+            if (howPeoplePlayed != null) {
+                Plays plays = howPeoplePlayed.get(gameIndex);
+
+                Label labelOne = new Label(plays.getOne() + "/" + numPlayers);
+                labelOne.setStyleName("howPeoplePlayed");
+                grid.setWidget(row, 1, labelOne);
+
+                Label labelX = new Label(plays.getX() + "/" + numPlayers);
+                labelX.setStyleName("howPeoplePlayed");
+                grid.setWidget(row, 2, labelX);
+
+                Label labelTwo = new Label(plays.getTwo() + "/" + numPlayers);
+                labelTwo.setStyleName("howPeoplePlayed");
+                grid.setWidget(row, 3, labelTwo);
+                row++;
+            }
         }
         return grid;
     }
@@ -383,6 +413,9 @@ public class WebApp implements EntryPoint {
     }
 
     private void renderAllPlays(Map<String, List<PlaysDto>> allPlays) {
+        int numPlayers = allPlays.size();
+
+        List<List<Plays>> howPeoplePlayed = computePlaysPercentages(allPlays);
 
         for (Map.Entry<String, List<PlaysDto>> e : allPlays.entrySet()) {
             int row = 0;
@@ -405,13 +438,83 @@ public class WebApp implements EntryPoint {
             for (PlaysDto playsDto : plays) {
                 Result result = results.get(roundIndex);
 
-                Grid grid = getPlayGrid(roundIndex, Round.fromPlaysDto(playsDto), result);
+                Grid grid = getPlayGrid(roundIndex, Round.fromPlaysDto(playsDto), result,
+                                        howPeoplePlayed.get(roundIndex), numPlayers);
                 mainGrid.setWidget(row + 1, roundIndex, grid);
                 roundIndex++;
             }
 
             allPlaysPanel.add(label);
             allPlaysPanel.add(mainGrid);
+        }
+    }
+
+    private List<List<Plays>> computePlaysPercentages(Map<String, List<PlaysDto>> allPlays) {
+        List<List<Plays>> all = new ArrayList<>();
+        for (int roundIndex = 0; roundIndex < Round.NUM_ROUNDS; roundIndex++) {
+            List<Plays> playsForRound = new ArrayList<>();
+            all.add(playsForRound);
+            for (int gameIndex = 0; gameIndex < Round.NUM_GAMES; gameIndex++) {
+                playsForRound.add(new Plays());
+            }
+        }
+
+        for (Map.Entry<String, List<PlaysDto>> e : allPlays.entrySet()) {
+            for (PlaysDto playsDto : e.getValue()) {
+                int gameIndex = 0;
+                List<Plays> plays = all.get(playsDto.roundIndex);
+                for (PlayDto playDto : playsDto.plays) {
+                    plays.get(gameIndex++).append(playDto);
+                }
+            }
+        }
+
+        return all;
+    }
+
+    private static class Plays {
+
+        private int one;
+        private int x;
+        private int two;
+
+        private Plays() {
+            this(0, 0, 0);
+        }
+
+        private Plays(int one, int x, int two) {
+            this.one = one;
+            this.x = x;
+            this.two = two;
+        }
+
+        private int getOne() {
+            return one;
+        }
+
+        private int getX() {
+            return x;
+        }
+
+        private int getTwo() {
+            return two;
+        }
+
+        public void append(PlayDto playDto) {
+            boolean[] checked = playDto.checked;
+            one += checked[0] ? 1 : 0;
+            x += checked[1] ? 1 : 0;
+            two += checked[2] ? 1 : 0;
+        }
+
+        public int[] percentages(int numPlayers) {
+            return new int[]{percentage(one, numPlayers),
+                             percentage(x, numPlayers),
+                             percentage(two, numPlayers)};
+        }
+
+        private int percentage(int numPlayed, int numPlayers) {
+            return (int) Math.round((100d * numPlayed) / numPlayers);
         }
     }
 
