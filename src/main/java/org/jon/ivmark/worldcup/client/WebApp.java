@@ -148,7 +148,7 @@ public class WebApp implements EntryPoint {
             overallToplist.setText(row, column++, getPointsText(pointsEntries.get(0)));
             overallToplist.setText(row, column++, getPointsText(pointsEntries.get(1)));
             overallToplist.setText(row, column++, getPointsText(pointsEntries.get(2)));
-            overallToplist.setText(row, column, topListEntry.totalPoints() + "");
+            overallToplist.setText(row, column, topListEntry.totalPoints() + " (" + topListEntry.totalNumCorrect() + ")");
             row++;
         }
 
@@ -362,8 +362,8 @@ public class WebApp implements EntryPoint {
 
     private String getSimilarityColor(int similarity) {
         double sim = similarity / 100d;
-        int green = (int) (200 * sim);
-        int red = 200 - green;
+        int green = (int) (180 * sim);
+        int red = 180 - green;
         int blue = red;
         return "rgb(" + red + "," + green + "," + blue + ")";
     }
