@@ -47,6 +47,8 @@ public class TopListEntry implements Serializable {
         return "TopListEntry{" +
                 "teamName='" + teamName + '\'' +
                 ", entries=" + entries +
+                ", position=" + position +
+                ", userId='" + userId + '\'' +
                 '}';
     }
 

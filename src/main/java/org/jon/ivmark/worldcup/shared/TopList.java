@@ -99,7 +99,7 @@ public class TopList implements Serializable {
         int count = 0;
         for (TopListEntry entry : topListEntries) {
             if (entry.totalPoints() < prevPoints) {
-                position += count;
+                position = count + 1;
             }
             entry.setPosition(position);
             prevPoints = entry.totalPoints();
