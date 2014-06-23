@@ -3,14 +3,11 @@ package org.jon.ivmark.worldcup.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import org.jon.ivmark.worldcup.shared.*;
+import org.jon.ivmark.worldcup.playoffs.client.PlayoffPanel;
+import org.jon.ivmark.worldcup.shared.LoginInfo;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
