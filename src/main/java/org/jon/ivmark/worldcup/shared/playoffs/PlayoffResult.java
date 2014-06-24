@@ -24,4 +24,12 @@ public class PlayoffResult implements Serializable {
     public void setGameResult(GameResult gameResult) {
         this.gameResult = gameResult;
     }
+
+    @Override
+    public String toString() {
+        return "PlayoffResult{" +
+                "game=" + game +
+                ", gameResult=" + gameResult +
+                '}';
+    }
 }

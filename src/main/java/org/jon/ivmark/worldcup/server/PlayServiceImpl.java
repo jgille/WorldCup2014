@@ -19,7 +19,7 @@ public class PlayServiceImpl extends RemoteServiceServlet implements PlayService
     private final PlaysRepository playsRepository = new DataStorePlaysRepository();
     private final TeamRepository teamRepository = new DataStoreTeamRepository();
 
-    private static final Logger LOGGER = Logger.getLogger(DataStorePlaysRepository.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PlayServiceImpl.class.getName());
 
     @Override
     public void savePlay(PlaysDto plays) {

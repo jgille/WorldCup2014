@@ -14,14 +14,10 @@ public class PlayoffPanel {
     }
 
     public Widget getMainPanel() {
-        if (loginInfo.isAdmin()) {
-            TabLayoutPanel tabs = new TabLayoutPanel(1.5, Style.Unit.EM);
-            tabs.add(new ScrollPanel(getResultsPanel()), "Resultat");
-            mainPanel.add(tabs);
-            return mainPanel;
-        } else {
-            return new Label("Under konstruktion, så sluta tjata...");
-        }
+        TabLayoutPanel tabs = new TabLayoutPanel(1.5, Style.Unit.EM);
+        tabs.add(new ScrollPanel(getResultsPanel()), "Resultat");
+        mainPanel.add(tabs);
+        return mainPanel;
     }
 
     private Widget getResultsPanel() {

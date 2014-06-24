@@ -19,6 +19,10 @@
         <servlet-name>resultService</servlet-name>
         <servlet-class>org.jon.ivmark.worldcup.server.ResultsServiceImpl</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>playoffService</servlet-name>
+        <servlet-class>org.jon.ivmark.worldcup.playoffs.server.PlayoffServiceImpl</servlet-class>
+    </servlet>
 
 
     <servlet-mapping>
@@ -32,6 +36,10 @@
     <servlet-mapping>
         <servlet-name>resultService</servlet-name>
         <url-pattern>/webapp/result</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>playoffService</servlet-name>
+        <url-pattern>/webapp/playoff</url-pattern>
     </servlet-mapping>
 
     <!-- Default page to serve -->

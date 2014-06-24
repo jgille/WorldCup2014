@@ -40,4 +40,14 @@ public class PlayoffGame implements Serializable {
     public void setAwayTeam(String awayTeam) {
         this.awayTeam = awayTeam;
     }
+
+    @Override
+    public String toString() {
+        return "PlayoffGame{" +
+                "round=" + round +
+                ", gameIndex=" + gameIndex +
+                ", homeTeam='" + homeTeam + '\'' +
+                ", awayTeam='" + awayTeam + '\'' +
+                '}';
+    }
 }

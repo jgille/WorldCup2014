@@ -97,4 +97,10 @@ table {
     text-align: right;
 }
 
+.playoffTableHeading {
+    font-weight: bold;
+    font-size: 12pt;
+    padding-top: 20px;
+}
+
 
