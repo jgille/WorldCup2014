@@ -12,6 +12,12 @@ public class LoginInfo implements Serializable {
     private String nickname;
     private boolean maySubmitPlay = true;
 
+    private boolean maySubmitEightsFinal;
+    private boolean maySubmitQuarterFinal;
+    private boolean maySubmitSemiFinal;
+    private boolean maySubmitBronzeMatch;
+    private boolean maySubmitFinal;
+
     public boolean isAdmin() {
         return isAdmin;
     }
@@ -66,5 +72,45 @@ public class LoginInfo implements Serializable {
 
     public boolean maySubmitPlay() {
         return maySubmitPlay;
+    }
+
+    public boolean isMaySubmitEightsFinal() {
+        return maySubmitEightsFinal;
+    }
+
+    public void setMaySubmitEightsFinal(boolean maySubmitEightsFinal) {
+        this.maySubmitEightsFinal = maySubmitEightsFinal;
+    }
+
+    public boolean isMaySubmitQuarterFinal() {
+        return maySubmitQuarterFinal;
+    }
+
+    public void setMaySubmitQuarterFinal(boolean maySubmitQuarterFinal) {
+        this.maySubmitQuarterFinal = maySubmitQuarterFinal;
+    }
+
+    public boolean isMaySubmitSemiFinal() {
+        return maySubmitSemiFinal;
+    }
+
+    public void setMaySubmitSemiFinal(boolean maySubmitSemiFinal) {
+        this.maySubmitSemiFinal = maySubmitSemiFinal;
+    }
+
+    public boolean isMaySubmitBronzeMatch() {
+        return maySubmitBronzeMatch;
+    }
+
+    public void setMaySubmitBronzeMatch(boolean maySubmitBronzeMatch) {
+        this.maySubmitBronzeMatch = maySubmitBronzeMatch;
+    }
+
+    public boolean isMaySubmitFinal() {
+        return maySubmitFinal;
+    }
+
+    public void setMaySubmitFinal(boolean maySubmitFinal) {
+        this.maySubmitFinal = maySubmitFinal;
     }
 }

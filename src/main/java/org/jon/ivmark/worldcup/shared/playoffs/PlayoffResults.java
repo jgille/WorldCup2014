@@ -61,4 +61,5 @@ public class PlayoffResults implements Serializable {
     public void setResults(List<PlayoffResult> results) {
         this.results = results;
     }
+
 }

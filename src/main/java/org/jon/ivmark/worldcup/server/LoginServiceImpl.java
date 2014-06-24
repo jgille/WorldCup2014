@@ -39,6 +39,11 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
         LoginInfo loginInfo = new LoginInfo();
 
         loginInfo.setMaySubmitPlay(CutOff.isBeforeCutOff());
+        loginInfo.setMaySubmitEightsFinal(CutOff.isBeforeEightsFinalCutOff());
+        loginInfo.setMaySubmitQuarterFinal(CutOff.isWithinQuarterFinalPeriod());
+        loginInfo.setMaySubmitSemiFinal(CutOff.isWithinSemiFinalPeriod());
+        loginInfo.setMaySubmitBronzeMatch(CutOff.isWithinBronzeMatchPeriod());
+        loginInfo.setMaySubmitFinal(CutOff.isWithinFinalPeriod());
 
         if (user != null) {
             loginInfo.setLoggedIn(true);
