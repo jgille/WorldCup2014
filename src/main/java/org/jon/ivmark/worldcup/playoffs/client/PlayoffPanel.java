@@ -18,7 +18,7 @@ public class PlayoffPanel {
         tabs.add(new ScrollPanel(getPlaysPanel()), "Dina spel");
         tabs.add(new ScrollPanel(getResultsPanel()), "Resultat");
         tabs.add(new Label("Inte tillgängligt ännu"), "Topplista");
-        tabs.add(new Label("Inte tillgängligt ännu"), "Alla spel");
+        tabs.add(new ScrollPanel(getAllPlaysPanel()), "Alla spel");
         mainPanel.add(tabs);
         return mainPanel;
     }
@@ -29,5 +29,9 @@ public class PlayoffPanel {
 
     private Widget getResultsPanel() {
         return new ResultsPanel(loginInfo).getWidget();
+    }
+
+    public Widget getAllPlaysPanel() {
+        return new AllPlaysPanel(loginInfo).getWidget();
     }
 }

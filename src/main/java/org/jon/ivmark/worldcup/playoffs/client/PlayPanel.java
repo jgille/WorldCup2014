@@ -102,11 +102,11 @@ public class PlayPanel {
     private void renderPlays(PlayoffPlays plays) {
         rows = new ArrayList<>();
         mainPanel.add(numRowsLabel);
-        mainPanel.add(getSubPanel("Åttondelsfinaler", plays.getEightsFinalResults(), PlayoffRound.EIGHTS_FINAL));
-        mainPanel.add(getSubPanel("Kvartsfinaler", plays.getQuarterFinalResults(), PlayoffRound.QUARTER_FINAL));
-        mainPanel.add(getSubPanel("Semifinaler", plays.getSemiFinalResults(), PlayoffRound.SEMI_FINAL));
-        mainPanel.add(getSubPanel("Bronsmatch", plays.getBronzeGameResult(), PlayoffRound.BRONZE_GAME));
-        mainPanel.add(getSubPanel("Final", plays.getFinalGameResult(), PlayoffRound.FINAL));
+        mainPanel.add(getSubPanel("Åttondelsfinaler", plays.getEightsFinalPlays(), PlayoffRound.EIGHTS_FINAL));
+        mainPanel.add(getSubPanel("Kvartsfinaler", plays.getQuarterFinalPlays(), PlayoffRound.QUARTER_FINAL));
+        mainPanel.add(getSubPanel("Semifinaler", plays.getSemiFinalPlays(), PlayoffRound.SEMI_FINAL));
+        mainPanel.add(getSubPanel("Bronsmatch", plays.getBronzeGamePlay(), PlayoffRound.BRONZE_GAME));
+        mainPanel.add(getSubPanel("Final", plays.getFinalGamePlay(), PlayoffRound.FINAL));
         numRowsLabel.setText(getNumRowsText());
     }
 

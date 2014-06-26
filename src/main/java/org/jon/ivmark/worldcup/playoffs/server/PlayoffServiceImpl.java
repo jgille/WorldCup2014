@@ -5,14 +5,13 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import org.jon.ivmark.worldcup.client.domain.Round;
 import org.jon.ivmark.worldcup.playoffs.client.PlayoffService;
+import org.jon.ivmark.worldcup.server.DataStoreTeamRepository;
+import org.jon.ivmark.worldcup.server.TeamRepository;
 import org.jon.ivmark.worldcup.shared.GameResult;
-import org.jon.ivmark.worldcup.shared.PlayDto;
 import org.jon.ivmark.worldcup.shared.playoffs.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class PlayoffServiceImpl extends RemoteServiceServlet implements PlayoffService {
@@ -21,6 +20,8 @@ public class PlayoffServiceImpl extends RemoteServiceServlet implements PlayoffS
     private static final String PLAY_KIND = "playoff_plays";
 
     private static final transient Logger LOGGER = Logger.getLogger(PlayoffServiceImpl.class.getName());
+
+    private transient final TeamRepository teamRepository = new DataStoreTeamRepository();
 
     @Override
     public void saveResults(List<PlayoffResult> results) {
@@ -63,6 +64,8 @@ public class PlayoffServiceImpl extends RemoteServiceServlet implements PlayoffS
         for (PlayoffPlay playoffPlay : plays) {
             PlayoffGame game = playoffPlay.getGame();
             Entity entity = new Entity(PLAY_KIND, getPlayKey(currentUser, game.getGameIndex()));
+            entity.setUnindexedProperty("user", currentUser.getUserId());
+            entity.setUnindexedProperty("game", game.getGameIndex());
             entity.setUnindexedProperty("play", checkedToString(playoffPlay.getChecked()));
 
             DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
@@ -123,12 +126,64 @@ public class PlayoffServiceImpl extends RemoteServiceServlet implements PlayoffS
         return playoffPlays;
     }
 
+    @Override
+    public List<PlayoffPlays> getAllPlays() {
+        List<PlayoffResult> results = getResults().getResults();
+
+        DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+        Query query = new Query(PLAY_KIND);
+        Iterable<Entity> entities = datastoreService.prepare(query).asIterable(FetchOptions.Builder.withLimit(10000));
+
+        Map<String, List<PlayoffPlay>> playsByUser = new HashMap<>();
+
+        for (Entity entity : entities) {
+            PlayoffPlay play = playFromEntity(entity);
+            PlayoffResult playoffResult = results.get(play.getGame().getGameIndex());
+            GameResult gameResult = playoffResult.getGameResult();
+            play.setGameResult(gameResult);
+            play.getGame().setHomeTeam(playoffResult.getGame().getHomeTeam());
+            play.getGame().setAwayTeam(playoffResult.getGame().getAwayTeam());
+
+            String userId = play.getUserId();
+            List<PlayoffPlay> plays = playsByUser.get(userId);
+            if (plays == null) {
+                plays = new ArrayList<>();
+                playsByUser.put(userId, plays);
+            }
+            plays.add(play);
+        }
+
+        return convertPlays(playsByUser);
+    }
+
+    private List<PlayoffPlays> convertPlays(Map<String, List<PlayoffPlay>> playsByUser) {
+        List<PlayoffPlays> allPlays = new ArrayList<>(playsByUser.size());
+
+        for (Map.Entry<String, List<PlayoffPlay>> e : playsByUser.entrySet()) {
+            String userId = e.getKey();
+            String teamName = teamRepository.getTeamName(userId);
+            List<PlayoffPlay> plays = e.getValue();
+            PlayoffPlays playoffPlays = new PlayoffPlays();
+            playoffPlays.setPlays(plays);
+            playoffPlays.setTeamName(teamName);
+
+            allPlays.add(playoffPlays);
+        }
+        Collections.sort(allPlays, new Comparator<PlayoffPlays>() {
+            @Override
+            public int compare(PlayoffPlays o1, PlayoffPlays o2) {
+                return o1.getTeamName().compareTo(o2.getTeamName());
+            }
+        });
+        return allPlays;
+    }
+
     private PlayoffPlay getPlay(User currentUser, int gameIndex) {
         String playKey = getPlayKey(currentUser, gameIndex);
         DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
         try {
             Entity entity = datastoreService.get(KeyFactory.createKey(PLAY_KIND, playKey));
-            return playFromEntity(gameIndex, entity);
+            return playFromEntity(entity);
         } catch (EntityNotFoundException e) {
             LOGGER.info("No play found for " + gameIndex);
             return defaultPlay(gameIndex);
@@ -144,9 +199,11 @@ public class PlayoffServiceImpl extends RemoteServiceServlet implements PlayoffS
         return playoffPlay;
     }
 
-    private PlayoffPlay playFromEntity(int gameIndex, Entity entity) {
+    private PlayoffPlay playFromEntity(Entity entity) {
         PlayoffPlay playoffPlay = new PlayoffPlay();
+        playoffPlay.setUserId((String) entity.getProperty("user"));
         PlayoffGame game = new PlayoffGame();
+        int gameIndex = ((Long) entity.getProperty("game")).intValue();
         game.setGameIndex(gameIndex);
         game.setRound(PlayoffRound.fromGameIndex(gameIndex));
         List<Boolean> checked = checkedFromString((String) entity.getProperty("play"));

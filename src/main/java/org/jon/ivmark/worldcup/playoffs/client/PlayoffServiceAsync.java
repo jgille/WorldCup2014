@@ -18,4 +18,6 @@ public interface PlayoffServiceAsync {
     void savePlays(List<PlayoffPlay> plays, AsyncCallback<Void> async);
 
     void getPlays(AsyncCallback<PlayoffPlays> async);
+
+    void getAllPlays(AsyncCallback<List<PlayoffPlays>> async);
 }

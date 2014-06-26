@@ -8,6 +8,8 @@ import java.util.List;
 
 public class PlayoffPlay implements Serializable {
 
+    private String userId;
+
     private PlayoffGame game;
     private List<Boolean> checked = new ArrayList<>();
     private GameResult gameResult;
@@ -16,6 +18,14 @@ public class PlayoffPlay implements Serializable {
         for (int i = 0; i < 3; i++) {
             checked.add(false);
         }
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public PlayoffGame getGame() {
@@ -47,8 +57,10 @@ public class PlayoffPlay implements Serializable {
     @Override
     public String toString() {
         return "PlayoffPlay{" +
-                "game=" + game +
+                "userId='" + userId + '\'' +
+                ", game=" + game +
                 ", checked=" + checked +
+                ", gameResult=" + gameResult +
                 '}';
     }
 

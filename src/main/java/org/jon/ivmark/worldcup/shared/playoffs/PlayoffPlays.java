@@ -1,5 +1,7 @@
 package org.jon.ivmark.worldcup.shared.playoffs;
 
+import org.jon.ivmark.worldcup.shared.GameResult;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +9,8 @@ import java.util.Comparator;
 import java.util.List;
 
 public class PlayoffPlays implements Serializable {
+
+    private String teamName;
 
     private List<PlayoffPlay> plays;
 
@@ -26,6 +30,14 @@ public class PlayoffPlays implements Serializable {
 
             plays.add(playoffPlay);
         }
+    }
+
+    public String getTeamName() {
+        return teamName;
+    }
+
+    public void setTeamName(String teamName) {
+        this.teamName = teamName;
     }
 
     public int numRows() {
@@ -52,28 +64,40 @@ public class PlayoffPlays implements Serializable {
         return playoffPlays;
     }
 
-    public List<PlayoffPlay> getEightsFinalResults() {
+    public List<PlayoffPlay> getEightsFinalPlays() {
         return getPlays().subList(0, 8);
     }
 
-    public List<PlayoffPlay> getQuarterFinalResults() {
+    public List<PlayoffPlay> getQuarterFinalPlays() {
         return getPlays().subList(8, 12);
     }
 
-    public List<PlayoffPlay> getSemiFinalResults() {
+    public List<PlayoffPlay> getSemiFinalPlays() {
         return getPlays().subList(12, 14);
     }
 
-    public List<PlayoffPlay> getBronzeGameResult() {
+    public List<PlayoffPlay> getBronzeGamePlay() {
         return getPlays().subList(14, 15);
     }
 
-    public List<PlayoffPlay> getFinalGameResult() {
+    public List<PlayoffPlay> getFinalGamePlay() {
         return getPlays().subList(15, 16);
     }
 
     public void setPlays(List<PlayoffPlay> plays) {
-        this.plays = plays;
+        this.plays = new ArrayList<>(plays);
+
+        for (int i = plays.size(); i < 16; i++) {
+            PlayoffPlay playoffPlay = new PlayoffPlay();
+            PlayoffGame game = new PlayoffGame();
+            game.setGameIndex(i);
+            game.setRound(PlayoffRound.fromGameIndex(i));
+            game.setHomeTeam("Hemmalag");
+            game.setAwayTeam("Bortalag");
+            playoffPlay.setGame(game);
+            playoffPlay.setGameResult(GameResult.UNKNOWN);
+            this.plays.add(playoffPlay);
+        }
     }
 
 

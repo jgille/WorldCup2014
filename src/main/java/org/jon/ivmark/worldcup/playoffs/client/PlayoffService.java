@@ -20,4 +20,7 @@ public interface PlayoffService extends RemoteService {
 
     PlayoffPlays getPlays();
 
+    List<PlayoffPlays> getAllPlays();
+
+
 }
