@@ -17,10 +17,14 @@ public class PlayoffPanel {
         TabLayoutPanel tabs = new TabLayoutPanel(1.5, Style.Unit.EM);
         tabs.add(new ScrollPanel(getPlaysPanel()), "Dina spel");
         tabs.add(new ScrollPanel(getResultsPanel()), "Resultat");
-        tabs.add(new Label("Inte tillgängligt ännu"), "Topplista");
+        tabs.add(new ScrollPanel(getToplistPanel()), "Topplista");
         tabs.add(new ScrollPanel(getAllPlaysPanel()), "Alla spel");
         mainPanel.add(tabs);
         return mainPanel;
+    }
+
+    private Widget getToplistPanel() {
+        return new ToplistPanel().getWidget();
     }
 
     private Widget getPlaysPanel() {

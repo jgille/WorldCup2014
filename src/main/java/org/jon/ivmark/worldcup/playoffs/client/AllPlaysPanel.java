@@ -1,8 +1,6 @@
 package org.jon.ivmark.worldcup.playoffs.client;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -11,7 +9,6 @@ import org.jon.ivmark.worldcup.shared.playoffs.PlayoffGame;
 import org.jon.ivmark.worldcup.shared.playoffs.PlayoffPlay;
 import org.jon.ivmark.worldcup.shared.playoffs.PlayoffPlays;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AllPlaysPanel {
