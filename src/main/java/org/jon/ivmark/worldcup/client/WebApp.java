@@ -39,11 +39,11 @@ public class WebApp implements EntryPoint {
 
                     TabLayoutPanel tabs = new TabLayoutPanel(1.5, Style.Unit.EM);
 
-                    GroupPlayPanel groupPlayPanel = new GroupPlayPanel(loginInfo);
-                    tabs.add(groupPlayPanel.getMainPanel(), "Gruppspel");
-
                     PlayoffPanel playoffPanel = new PlayoffPanel(loginInfo);
                     tabs.add(playoffPanel.getMainPanel(), "Slutspel");
+
+                    GroupPlayPanel groupPlayPanel = new GroupPlayPanel(loginInfo);
+                    tabs.add(groupPlayPanel.getMainPanel(), "Gruppspel");
 
                     tabs.add(new SettingsPanel(userPanel).getMainPanel(), "Inställningar");
 
